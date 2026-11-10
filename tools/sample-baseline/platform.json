@@ -1,0 +1,63 @@
+{
+  "Identity": {
+    "Manufacturer": "Sample (fixtures)",
+    "Model": "Sample (fixtures)",
+    "SystemSku": "Sample (fixtures)",
+    "BiosVersion": "Sample (fixtures)",
+    "BiosReleaseDate": "Sample (fixtures)",
+    "ServiceTag": "Sample (fixtures)",
+    "BaseBoard": "Sample (fixtures)",
+    "Cpu": "Sample (fixtures)",
+    "OsCaption": "Sample (fixtures)",
+    "OsVersion": null,
+    "OsBuild": null,
+    "ExpectedModelConfirmed": false,
+    "ExpectedModelNotes": "Sample baseline generated from the UefiAccess test fixtures; not a real machine, so the expected model is not confirmed.",
+    "Errors": []
+  },
+  "Tpm": {
+    "Present": false,
+    "SpecVersion": null,
+    "Enabled": null,
+    "Activated": null,
+    "Errors": [
+      "Sample baseline generated from the test fixtures: nothing on this machine was inspected."
+    ]
+  },
+  "SecureBootPolicy": {
+    "RegistryEnabled": null,
+    "VariableSecureBoot": true,
+    "VariableSetupMode": false,
+    "VariableDeployedMode": null,
+    "VariableAuditMode": null,
+    "PowerShellConfirm": null,
+    "Capable": true,
+    "SourcesAgree": true,
+    "Errors": [
+      "Sample baseline generated from the test fixtures: nothing on this machine was inspected. SecureBoot and SetupMode come from the sample variables."
+    ]
+  },
+  "BitLocker": {
+    "Volumes": [],
+    "Errors": [
+      "Sample baseline generated from the test fixtures: nothing on this machine was inspected."
+    ]
+  },
+  "Dell": {
+    "DcmClassesPresent": false,
+    "DcmClassesFound": [],
+    "Samples": [],
+    "CctkFound": false,
+    "CctkPath": null,
+    "CctkVersion": null,
+    "CctkSecureBootOutput": null,
+    "NativeBiosAttributesNamespacePresent": false,
+    "NativeWmiSecurityNamespacePresent": false,
+    "Errors": [
+      "Sample baseline generated from the test fixtures: nothing on this machine was inspected."
+    ],
+    "DcimClassCount": 0,
+    "CctkSecureBootEnabled": null,
+    "DcmClassesResponding": []
+  }
+}

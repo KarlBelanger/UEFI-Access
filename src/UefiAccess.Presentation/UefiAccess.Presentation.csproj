@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    View models, services, strings and accessibility abstractions of the UefiAccess GUI.
+    Deliberately NOT a WPF project: no UseWPF, no PresentationFramework, WindowsBase or
+    System.Xaml, so the test project can reference it and the test host starts on any OS.
+    INotifyPropertyChanged, ObservableCollection and ICommand come from System.ObjectModel.
+    Depends on Core only; the WPF App references this project and Core.
+  -->
+  <PropertyGroup>
+    <RootNamespace>UefiAccess.Presentation</RootNamespace>
+    <AssemblyName>UefiAccess.Presentation</AssemblyName>
+    <Description>View models, services and accessibility abstractions of the UefiAccess GUI (no WPF dependency).</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UefiAccess.Core\UefiAccess.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="UefiAccess.Core.Tests" />
+  </ItemGroup>
+
+</Project>

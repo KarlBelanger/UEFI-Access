@@ -1,0 +1,27 @@
+Sample baseline generated from the UefiAccess test fixtures by tests/UefiAccess.Core.Tests/Presentation/SampleBaselineGeneratorTests.cs.
+Not a real machine: the identity reads "Sample (fixtures)" in every field, the timestamp is fixed at 2026-09-15T12:00:00+00:00,
+and the Secure Boot keys are deterministic byte patterns, not certificates; dell-settings.json holds the Dell
+fixtures' values of BIOS A18, read from no machine. It exists so the application's
+Open baseline folder can be exercised on any PC; it proves nothing about any hardware.
+Regenerate after a fixture change with: UEFIACCESS_WRITE_SAMPLE_BASELINE=1 dotnet test UefiAccess.sln -c Release
+Baseline export outcome
+Variables indexed: 13
+Files written before log.txt: 17
+  vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_Boot0001.bin
+  vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_Boot0002.bin
+  vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_Boot0003.bin
+  vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_Boot0004.bin
+  vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_BootNext.bin
+  vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_BootOrder.bin
+  vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_KEK.bin
+  vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_PK.bin
+  vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_SecureBoot.bin
+  vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_SetupMode.bin
+  vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_Timeout.bin
+  vars/d719b2cb-3d3a-4596-a3bc-dad00e67656f_db.bin
+  vars/d719b2cb-3d3a-4596-a3bc-dad00e67656f_dbx.bin
+  index.json
+  decoded.json
+  platform.json
+  dell-settings.json
+Errors: 0

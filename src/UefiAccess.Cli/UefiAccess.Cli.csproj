@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>uefiaccess</AssemblyName>
+    <RootNamespace>UefiAccess.Cli</RootNamespace>
+    <Description>Read-only UEFI variable command-line tool.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="2.0.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UefiAccess.Core\UefiAccess.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="UefiAccess.Core.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Commands\README.md" />
+    <None Include="Output\README.md" />
+  </ItemGroup>
+
+</Project>

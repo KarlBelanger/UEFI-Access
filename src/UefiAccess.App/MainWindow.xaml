@@ -1,0 +1,1258 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
+-->
+<Window x:Class="UefiAccess.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:res="clr-namespace:UefiAccess.Presentation.Resources;assembly=UefiAccess.Presentation"
+        xmlns:vm="clr-namespace:UefiAccess.Presentation.ViewModels;assembly=UefiAccess.Presentation"
+        xmlns:platform="clr-namespace:UefiAccess.App.Platform"
+        xmlns:app="clr-namespace:UefiAccess.App"
+        Title="{Binding WindowTitle, Mode=OneWay, FallbackValue={x:Static res:Strings.WindowTitle}}"
+        AutomationProperties.Name="{Binding WindowTitle, Mode=OneWay, FallbackValue={x:Static res:Strings.WindowTitle}}"
+        Width="1200"
+        Height="800"
+        MinWidth="900"
+        MinHeight="600"
+        FontSize="{DynamicResource {x:Static SystemFonts.MessageFontSizeKey}}"
+        Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+        Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+        KeyboardNavigation.TabNavigation="Cycle"
+        Loaded="OnLoaded"
+        PreviewKeyDown="OnWindowPreviewKeyDown"
+        PreviewKeyUp="OnWindowPreviewKeyUp"
+        PreviewMouseUp="OnWindowPreviewMouseUp"
+        Deactivated="OnDeactivated">
+    <!--
+        Alpha 1 shell (M2), with the Change group of M3. Stock controls only, no control templates,
+        no timed behaviour in the markup (the one quiet period, of the detail pane's update, is the
+        scheduler's; A2-7), every user-visible string from Presentation.Resources.Strings (the
+        Writability sentences from Core's WritabilitySentences), colours only through SystemColors,
+        and no hard-coded font size: every text follows SystemFonts.MessageFontSize, the metric the
+        Windows "Text size" accessibility setting scales (the detail heading is that size scaled by
+        a LayoutTransform, so it grows with it).
+
+        Seven regions in F6 order since M4, each a named GroupBox (WPF on .NET 8 has no
+        AutomationProperties.LandmarkType, so the regions are exposed as named groups):
+        Toolbar, Filter, List, Detail, Log, Dell settings, Status. Tab order: toolbar buttons (1-5),
+        filter box (6), Group by (7), Sort by (8), the variable list as one stop (9,
+        KeyboardNavigation.TabNavigation Once on the ItemsControl of groups), the list/detail
+        splitter (10), the detail heading (11), the detail fields (12, one read-only TextBox per
+        field), the Writability line (13), the Change group (M3: the Boot order entries list 14,
+        Move up 15, Move down 16, Review change 17, Boot once from this entry 18, Clear one-time
+        boot 19, Restore previous value 20), the log splitter (21), the log list (22), Copy log (23),
+        the Dell settings region (M4: Read Dell settings 24, the state line Dell settings source 25,
+        the list Dell BIOS settings 26) and the Status box (27; 24 in the M3 builds, 17 before M3).
+
+        The Dell settings region is a region of its own, after
+        Log and before Status, because the Dell view is a second source that does not depend on the
+        selected variable; it sits in an Auto row of the panes grid, so the log splitter and its
+        30 percent are unchanged, and its list scrolls inside, its height capped by
+        FitPanesToWindow. Its notes are on the region below.
+
+        The Change group is a stock GroupBox inside the Detail
+        region, after the Writability line, so it is no seventh region and F6 does not stop in it.
+        It is shown only when the Presentation surface says so (Detail.Change.IsVisible: the live
+        source, and BootOrder, BootNext or an active category-Boot Boot####), and inside it only the
+        controls that belong to the variable shown are visible; a collapsed control is no tab stop.
+        Nothing in it writes: Move up, Move down and Ctrl+Z rearrange the proposed order (one
+        ObservableCollection.Move each, so a row keeps its container and its focus), and the four
+        buttons that open the Confirm change dialog (ConfirmChangeWindow.xaml) only start the checks.
+        The boot order list has its own item peers (a ListBox, not a fourth plain ItemsControl) and a
+        keyed row style of its own; its position is the stock item peer's ("1 of 2"). Nothing here
+        relies on a RangeValue, and the Status box stays the only live region.
+
+        The variable list is an ItemsControl of groups: one stock Expander per group (its header,
+        a focusable toggle button, is named "<label>, <n> items" through AutomationProperties.Name
+        on the Expander) holding one ListView in GridView mode for the group's rows. Every row's
+        AutomationProperties.Name is the row sentence (VariableItemViewModel.AccessibleName). A
+        single ListView with a GroupStyle cannot give focusable, collapsible group headers without
+        replacing the GroupItem template, which the rules forbid; the code-behind bridges the arrow
+        keys between the groups and takes Home and End across them so the list reads as one tree
+        (Page Up, Page Down and type-ahead are the stock ListView's and stay inside a group). The
+        column widths are fixed (a GridView cannot size columns proportionally); what does not fit
+        scrolls in the outer scroll viewer, by mouse or with Ctrl+Left and Ctrl+Right.
+
+        Alpha 1 round 1 (the tester's findings A1-1, A1-3 and A1-4): the three plain ItemsControls of
+        this window (the groups, the detail sections, the fields of a section) have no automation
+        peer. WPF's own ItemsControl peer puts one "data item" element per item in front of the
+        item's controls, named from the generated container (or, unnamed, from the item's
+        ToString()), so NVDA read a group header three times (data item, grouping, data grid) and
+        a section title or a field label twice. Nothing in XAML can remove or hide that element: a
+        container cannot be made a non-control, non-content element from markup, and a container
+        without a peer of its own is given a default one. So the application opts out of it with
+        the documented runtime switch Switch.System.Windows.Controls.ItemsControlDoesNotSupportAutomation
+        (Directory.Build.props, UefiAccess.App only): a plain ItemsControl then has no peer, and the
+        Expander, the GroupBox and the label and value of a field inside the templates are exposed
+        directly under the scroll viewer or group that holds them. ListBox, ListView and ComboBox
+        have peers of their own and are not affected. The generated containers therefore carry no
+        name, and the ItemContainerStyles that once named them are gone. The per-group ListView is
+        named by the group label alone ("EFI global variable rows") and carries no help text: the
+        header sentence is the Expander's, the list help is the List region's (A1-2).
+
+        The two splitters are AnnouncingGridSplitter (Platform/AnnouncingGridSplitter.cs, findings
+        A1-5 and A2-8): the stock GridSplitter with a peer derived from the stock
+        GridSplitterAutomationPeer that adds the Value pattern, read-only, whose value is the
+        splitter's position as a sentence naming both panes ("List 63 percent of the width, details
+        37 percent", "Log panel 30 percent of the height, list and details 70 percent"; Presentation
+        SplitterPosition), read on arrival. The share is a whole percent: the list's share of the
+        list and the detail pane, the log panel's share of the list/detail row and the log panel;
+        each arrow press moves the splitter by one percent. After every press, and at the end of a
+        drag that changed the share, the splitter's Moved event reaches the shell through the
+        code-behind, and the shell says the sentence in the Status box ("Limit reached: " before it
+        when the press could not move the splitter); the splitter itself raises no value change.
+        Kind names the sentence each splitter says. A control subclass with the stock template and
+        drag, not a template override; the implicit splitter style below targets the subclass,
+        because an implicit style applies to its exact type only.
+
+        Layout (round 2): the Status region is pinned to the bottom of the window in a row of its
+        own, so no resize, text size or display scale can push it off the window. Above it, the
+        list/detail row and the log row share the height as star rows, so the stock splitter keeps
+        both minimums (the log row can no longer grow past the window); the list/detail row keeps
+        160 while there is room and gives way first when there is not, down to 80, and only then
+        does the part above Status scroll (FitPanesToWindow). The window's start-up and minimum
+        sizes are reduced to the work area (Presentation WindowFit).
+
+        Low vision (round 2): colours only from SystemColors, through DynamicResource, so a switch
+        to a contrast theme repaints at once. Focus is shown by style triggers, not by focus visuals
+        (which WPF draws only after a key press): a thicker border on text boxes and buttons, a
+        border in the Highlight colour on the focused row (HighlightText when that row is selected
+        in a contrast theme, which fills it with Highlight), a dark outline on a selected row while
+        the list does not have focus, and the Highlight colour on a focused splitter. The rows of the
+        boot order list, and since M4 the rows of the list of Dell BIOS settings, carry the same
+        three row triggers as the variable rows.
+
+        The Status box is the only polite live region; the log list is Off; nothing is Assertive.
+    -->
+    <Window.Resources>
+        <!--
+            Buttons: spacing, and a border two pixels thick in the text colour while the button has
+            keyboard focus. WPF draws its dotted focus rectangle only once a key has been pressed,
+            so Refresh, focused when the window opens, showed no focus at all (the padding shrinks
+            by the extra border, so the label does not move). A style trigger, no template.
+        -->
+        <Style x:Key="ToolbarButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="Margin" Value="0,0,8,4" />
+            <Setter Property="MinWidth" Value="96" />
+            <Style.Triggers>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="BorderThickness" Value="2" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
+                    <Setter Property="Padding" Value="11,5" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--
+            Every text box: a border three pixels thick while it has keyboard focus (the stock look
+            only changes the colour of a one-pixel border in the default theme; a contrast theme
+            makes it five pixels thick itself). The padding shrinks by the extra border, so the
+            text does not move.
+        -->
+        <Style TargetType="TextBox">
+            <Setter Property="Padding" Value="2" />
+            <Style.Triggers>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="BorderThickness" Value="3" />
+                    <Setter Property="Padding" Value="0" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- The filter box: the same focus border, with more room around its text. -->
+        <Style x:Key="FilterBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="Padding" Value="4,3" />
+            <Style.Triggers>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="Padding" Value="2,1" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--
+            Detail fields: read-only text boxes that expose the Value pattern. A single-line value
+            wraps inside its box however long it is, so a low-vision reader at a high text size or
+            zoom never scrolls a box sideways. NVDA reads a text box that gets focus only up to the
+            end of the visual line at the caret, unless text is selected, which it reads whole
+            ("selected" and the text): a wrapped value was heard up to its first visual line (round
+            1: Boot0000's Device path read as "HD", Writability cut at "from this"). So the window
+            selects a single-line value whole when keyboard focus arrives on its box from another
+            element (OnDetailFieldGotKeyboardFocus, VariableDetailViewModel.SelectionOnKeyboardArrival);
+            Up and Down then read it one visual line at a time from the top (StartLinesAtTheTop). A
+            click places the caret as usual, and focus coming back to the same box from its context
+            menu or from another window leaves a selection or caret position of the user's own as
+            it is. NVDA reads a selection of 512 characters or more only as "selected N characters",
+            so a value that long is not selected: the caret goes to its start, NVDA reads its first
+            line on screen, and its help text (DetailFieldViewModel.HelpText, which is
+            VariableDetailViewModel.HelpTextFor of the field, notified whenever it changes) gives
+            its length and says that Down reads it line by line. A multi-line value (the hex dump, a
+            decoded value with line breaks) keeps its own lines unwrapped in a monospace font,
+            scrolls inside the box, and is read line by line from the first. A row change keeps the
+            box of every field both rows have in the same order and replaces only its text (the note
+            on SectionsControl), so the box keeps no undo history (IsUndoEnabled off): a kept box
+            would otherwise hold the values of the rows it showed before, and nothing in a read-only
+            box can be undone anyway.
+        -->
+        <Style x:Key="DetailFieldStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="IsReadOnlyCaretVisible" Value="True" />
+            <Setter Property="IsUndoEnabled" Value="False" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+            <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+            <Setter Property="MaxHeight" Value="320" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsMultiline}" Value="True">
+                    <Setter Property="TextWrapping" Value="NoWrap" />
+                    <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
+                    <Setter Property="AcceptsReturn" Value="True" />
+                    <Setter Property="FontFamily" Value="Consolas, Courier New, Lucida Console" />
+                    <Setter Property="MinHeight" Value="72" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--
+            The log lines: named by their sentence. Keyed, because the boot order list of the Change
+            group has a row style of its own for the same item type (BootOrderRowStyle).
+        -->
+        <Style x:Key="LogLineStyle" TargetType="ListBoxItem">
+            <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleName, Mode=OneWay}" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
+
+        <!--
+            The rows of the boot order list in the Change group (M3): each named "Boot0002, Windows
+            Boot Manager" (with ", inactive" or ", hidden" when so), with no help text of its own (the
+            list's is heard once, on arrival), and outlined exactly like the variable rows: a border
+            two pixels thick, transparent until a trigger colours it; a selected row keeps a
+            ControlDarkDark outline while the list does not have focus; the focused row is outlined
+            in Highlight, or in HighlightText when it is also selected in a contrast theme. The
+            position ("1 of 2") is the stock ListBoxItem peer's, so the name does not repeat it. No
+            template is replaced; colours and font are the system's.
+        -->
+        <Style x:Key="BootOrderRowStyle" TargetType="ListBoxItem">
+            <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleName, Mode=OneWay}" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Style.Triggers>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsSelected" Value="True" />
+                        <Condition Property="Selector.IsSelectionActive" Value="False" />
+                    </MultiTrigger.Conditions>
+                    <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}" />
+                </MultiTrigger>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                </Trigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding Path=(SystemParameters.HighContrast)}" Value="True" />
+                        <Condition Binding="{Binding IsKeyboardFocused, RelativeSource={RelativeSource Self}}" Value="True" />
+                        <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="True" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}" />
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--
+            The rows of the list of Dell BIOS settings: keyed, and not
+            based on the variable rows' style. Each row is named by its sentence, the name first
+            (DellSettingRowViewModel.AccessibleName, "Num Lock at boot: Enabled. Possible values:
+            Disabled, Enabled."), and carries no item status (D3: no Dell row can change) and no
+            help text (the list's help is heard once, on arrival). Outlined exactly like the
+            variable rows: a border two pixels thick, transparent until a trigger colours it; a
+            selected row keeps a ControlDarkDark outline while the list does not have focus; the
+            focused row is outlined in Highlight, or in HighlightText when it is also selected in a
+            contrast theme. The position ("1 of 10") is the stock ListViewItem peer's. No template
+            is replaced; colours and font are the system's.
+        -->
+        <Style x:Key="DellSettingRowStyle" TargetType="ListViewItem">
+            <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleName, Mode=OneWay}" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Style.Triggers>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsSelected" Value="True" />
+                        <Condition Property="Selector.IsSelectionActive" Value="False" />
+                    </MultiTrigger.Conditions>
+                    <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}" />
+                </MultiTrigger>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                </Trigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding Path=(SystemParameters.HighContrast)}" Value="True" />
+                        <Condition Binding="{Binding IsKeyboardFocused, RelativeSource={RelativeSource Self}}" Value="True" />
+                        <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="True" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}" />
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Grid column headers show the column names; sorting is done with the Sort by combo box, so the headers are not tab stops. -->
+        <Style TargetType="GridViewColumnHeader">
+            <Setter Property="IsTabStop" Value="False" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Padding" Value="6,2" />
+        </Style>
+
+        <!--
+            Group headers: the stock Expander of a contrast theme draws its header in WindowText on
+            no background of its own, that is on the window's Control background; ControlText is
+            the colour that goes with it (the pair the window itself uses), also in a contrast
+            theme whose window and button colours were edited apart.
+        -->
+        <Style TargetType="Expander">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
+        </Style>
+
+        <!--
+            Splitters: ControlDarkDark on the window's Control background, at least 3:1 in the
+            default theme (105 on 240 grey, 4.8:1) and in every contrast theme; with keyboard focus
+            the Highlight colour framed in HighlightText, so the focused splitter differs from the
+            others in every theme. Targets the subclass (see the note above).
+        -->
+        <Style TargetType="platform:AnnouncingGridSplitter">
+            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}" />
+            <Setter Property="Focusable" Value="True" />
+            <Setter Property="ShowsPreview" Value="False" />
+            <Style.Triggers>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}" />
+                    <Setter Property="BorderThickness" Value="2" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <!--
+        Two rows: everything above the Status region, then the Status region itself (an Auto row
+        that always gets its full height, so it is never pushed off the window). When the window is
+        too small for everything, the part above gives way: first the list/detail row (from 160
+        down to 80, FitPanesToWindow), then that part scrolls; nothing is cut off, and the Status
+        region stays in view.
+    -->
+    <Grid x:Name="LayoutRoot" Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!--
+            The regions above Status (five, and since M4 six with the Dell settings), in a scroll
+            viewer that scrolls only when the window is too small for them at the current text size
+            (for example 900 x 600 at 200 percent text): the grid is exactly as high as the viewer
+            (Height bound to ViewportHeight) and
+            never lower than its rows need (MinHeight, FitPanesToWindow), so the star rows share
+            the height as usual, and a vertical scroll bar appears only when that minimum does not
+            fit. Keyboard focus scrolls the focused control into view. The viewer is layout only:
+            not focusable, and unnamed, so a screen reader passes over it as it does over any
+            unnamed pane.
+        -->
+        <ScrollViewer x:Name="PanesScroller"
+                      Grid.Row="0"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Focusable="False"
+                      SizeChanged="OnLayoutPartSizeChanged">
+            <Grid x:Name="PanesGrid" Height="{Binding ViewportHeight, ElementName=PanesScroller, Mode=OneWay}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <!-- The list and the detail pane: 160 high whenever there is room (FitPanesToWindow lowers the minimum, down to 80, when there is not). -->
+                    <RowDefinition x:Name="ListDetailRow" Height="7*" MinHeight="160" />
+                    <RowDefinition Height="Auto" />
+                    <!--
+                        The log row is resizable (the log splitter above it) and must never become shorter
+                        than its group header plus the Copy log button, or the button is clipped at the
+                        bottom: finding A1-7, the button's descenders cut off at 200 percent text size once
+                        the row had been shrunk (the fixed minimum of 72 was right for 100 percent only).
+                        The minimum follows the Toolbar region's actual height: an Auto row with the same
+                        group header chrome and buttons of the same style, so at any text size it is exactly
+                        what the Log region needs for its header, its padding and one button (both come to
+                        header + button + 8). The log list shrinks first; the button never does. Like the
+                        list/detail row it is a star row, so the two share the height (three tenths for the
+                        log panel at first) and the stock splitter between them keeps both minimums: the
+                        log panel cannot grow past the window any more (round 2).
+                    -->
+                    <RowDefinition x:Name="LogRow" Height="3*" MinHeight="{Binding ActualHeight, ElementName=ToolbarRegion, Mode=OneWay}" />
+                    <!--
+                        The Dell settings region (M4) sizes to its content: an Auto row, so FitPanesToWindow
+                        counts it among the fixed rows and the log splitter's share (three tenths) is
+                        unchanged. Its list is capped (WindowFit.DellListMaximum, a quarter of the panes'
+                        height and never less than four lines) and scrolls inside, so the ten rows never
+                        push the Status region down.
+                    -->
+                    <RowDefinition x:Name="DellRow" Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Region 1: Toolbar -->
+                <GroupBox x:Name="ToolbarRegion"
+                          Grid.Row="0"
+                          Header="{x:Static res:Strings.RegionToolbar}"
+                          AutomationProperties.Name="{x:Static res:Strings.RegionToolbar}"
+                          Padding="6,4,6,0"
+                          Margin="0,0,0,4"
+                          SizeChanged="OnLayoutPartSizeChanged">
+                    <!--
+                        Access keys as screen readers speak them (round 2): WPF reports a button's access key
+                        as the bare underlined letter ("R"), which does nothing on its own because the window
+                        requires Alt (App.xaml.cs). Each button therefore sets AutomationProperties.AccessKey
+                        and AcceleratorKey to "Alt+<letter>". WPF 8 answers an empty access key whenever
+                        AutomationProperties.AccessKey is set (UIElementAutomationPeer.GetAccessKeyCore), so
+                        today the bare letter is gone and the accelerator key carries "Alt+R"; NVDA speaks
+                        the two together as the shortcut. The same on Copy log.
+                    -->
+                    <WrapPanel x:Name="ToolbarPanel" Orientation="Horizontal">
+                        <Button x:Name="RefreshButton"
+                                Content="{x:Static res:Strings.RefreshLabel}"
+                                AutomationProperties.Name="{x:Static res:Strings.RefreshName}"
+                                AutomationProperties.HelpText="{x:Static res:Strings.RefreshHelp}"
+                                AutomationProperties.AccessKey="{x:Static res:Strings.RefreshAccessKey}"
+                                AutomationProperties.AcceleratorKey="{x:Static res:Strings.RefreshAccessKey}"
+                                Command="{Binding RefreshCommand}"
+                                Style="{StaticResource ToolbarButtonStyle}"
+                                TabIndex="1" />
+                        <Button x:Name="OpenBaselineButton"
+                                Content="{x:Static res:Strings.OpenBaselineLabel}"
+                                AutomationProperties.Name="{x:Static res:Strings.OpenBaselineName}"
+                                AutomationProperties.HelpText="{x:Static res:Strings.OpenBaselineHelp}"
+                                AutomationProperties.AccessKey="{x:Static res:Strings.OpenBaselineAccessKey}"
+                                AutomationProperties.AcceleratorKey="{x:Static res:Strings.OpenBaselineAccessKey}"
+                                Command="{Binding OpenBaselineCommand}"
+                                Style="{StaticResource ToolbarButtonStyle}"
+                                TabIndex="2" />
+                        <Button x:Name="ClearFilterButton"
+                                Content="{x:Static res:Strings.ClearFilterLabel}"
+                                AutomationProperties.Name="{x:Static res:Strings.ClearFilterName}"
+                                AutomationProperties.HelpText="{x:Static res:Strings.ClearFilterHelp}"
+                                AutomationProperties.AccessKey="{x:Static res:Strings.ClearFilterAccessKey}"
+                                AutomationProperties.AcceleratorKey="{x:Static res:Strings.ClearFilterAccessKey}"
+                                Command="{Binding ClearFilterCommand}"
+                                Style="{StaticResource ToolbarButtonStyle}"
+                                TabIndex="3" />
+                        <Button x:Name="CopyValueButton"
+                                Content="{x:Static res:Strings.CopyValueLabel}"
+                                AutomationProperties.Name="{x:Static res:Strings.CopyValueName}"
+                                AutomationProperties.HelpText="{x:Static res:Strings.CopyValueHelp}"
+                                AutomationProperties.AccessKey="{x:Static res:Strings.CopyValueAccessKey}"
+                                AutomationProperties.AcceleratorKey="{x:Static res:Strings.CopyValueAccessKey}"
+                                Command="{Binding CopyValueCommand}"
+                                Style="{StaticResource ToolbarButtonStyle}"
+                                TabIndex="4" />
+                        <Button x:Name="ExportVisibleListButton"
+                                Content="{x:Static res:Strings.ExportVisibleListLabel}"
+                                AutomationProperties.Name="{x:Static res:Strings.ExportVisibleListName}"
+                                AutomationProperties.HelpText="{x:Static res:Strings.ExportVisibleListHelp}"
+                                AutomationProperties.AccessKey="{x:Static res:Strings.ExportVisibleListAccessKey}"
+                                AutomationProperties.AcceleratorKey="{x:Static res:Strings.ExportVisibleListAccessKey}"
+                                Command="{Binding ExportVisibleListCommand}"
+                                Style="{StaticResource ToolbarButtonStyle}"
+                                TabIndex="5" />
+                    </WrapPanel>
+                </GroupBox>
+
+                <!-- Region 2: Filter -->
+                <GroupBox x:Name="FilterRegion"
+                          Grid.Row="1"
+                          Header="{x:Static res:Strings.RegionFilter}"
+                          AutomationProperties.Name="{x:Static res:Strings.RegionFilter}"
+                          Padding="6,4"
+                          Margin="0,0,0,4"
+                          SizeChanged="OnLayoutPartSizeChanged">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" MinWidth="200" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   x:Name="FilterLabel"
+                                   Text="{x:Static res:Strings.FilterName}"
+                                   AutomationProperties.Name="{x:Static res:Strings.FilterName}"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0" />
+                        <TextBox Grid.Column="1"
+                                 x:Name="FilterBox"
+                                 Text="{Binding List.FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 AutomationProperties.Name="{x:Static res:Strings.FilterName}"
+                                 AutomationProperties.HelpText="{x:Static res:Strings.FilterHelp}"
+                                 AutomationProperties.LabeledBy="{Binding ElementName=FilterLabel}"
+                                 IsEnabled="{Binding IsFilterEnabled, Mode=OneWay}"
+                                 TabIndex="6"
+                                 VerticalAlignment="Center"
+                                 Style="{StaticResource FilterBoxStyle}"
+                                 TextChanged="OnFilterTextChanged"
+                                 PreviewKeyDown="OnFilterPreviewKeyDown" />
+                        <TextBlock Grid.Column="2"
+                                   x:Name="GroupByLabel"
+                                   Text="{x:Static res:Strings.GroupByName}"
+                                   AutomationProperties.Name="{x:Static res:Strings.GroupByName}"
+                                   VerticalAlignment="Center"
+                                   Margin="16,0,8,0" />
+                        <ComboBox Grid.Column="3"
+                                  x:Name="GroupByBox"
+                                  SelectedValuePath="Tag"
+                                  SelectedValue="{Binding List.GroupBy, Mode=TwoWay}"
+                                  AutomationProperties.Name="{x:Static res:Strings.GroupByName}"
+                                  AutomationProperties.HelpText="{x:Static res:Strings.GroupByHelp}"
+                                  AutomationProperties.LabeledBy="{Binding ElementName=GroupByLabel}"
+                                  IsEnabled="{Binding IsFilterEnabled, Mode=OneWay}"
+                                  TabIndex="7"
+                                  MinWidth="130"
+                                  VerticalAlignment="Center"
+                                  SelectionChanged="OnGroupOrSortChanged">
+                            <!--
+                                Each item says where it stands in its list (A2-4): the stock peer of a
+                                ComboBox's dropdown item gives no PositionInSet/SizeOfSet, so a screen
+                                reader could not say "1 of 3" and Axe.Windows reports an error.
+                            -->
+                            <ComboBoxItem Content="{x:Static res:Strings.GroupByNamespace}" AutomationProperties.Name="{x:Static res:Strings.GroupByNamespace}" AutomationProperties.PositionInSet="1" AutomationProperties.SizeOfSet="3" Tag="{x:Static vm:GroupBy.Namespace}" />
+                            <ComboBoxItem Content="{x:Static res:Strings.GroupByKind}" AutomationProperties.Name="{x:Static res:Strings.GroupByKind}" AutomationProperties.PositionInSet="2" AutomationProperties.SizeOfSet="3" Tag="{x:Static vm:GroupBy.Kind}" />
+                            <ComboBoxItem Content="{x:Static res:Strings.GroupByNone}" AutomationProperties.Name="{x:Static res:Strings.GroupByNone}" AutomationProperties.PositionInSet="3" AutomationProperties.SizeOfSet="3" Tag="{x:Static vm:GroupBy.None}" />
+                        </ComboBox>
+                        <TextBlock Grid.Column="4"
+                                   x:Name="SortByLabel"
+                                   Text="{x:Static res:Strings.SortByName}"
+                                   AutomationProperties.Name="{x:Static res:Strings.SortByName}"
+                                   VerticalAlignment="Center"
+                                   Margin="16,0,8,0" />
+                        <ComboBox Grid.Column="5"
+                                  x:Name="SortByBox"
+                                  SelectedValuePath="Tag"
+                                  SelectedValue="{Binding List.SortBy, Mode=TwoWay}"
+                                  AutomationProperties.Name="{x:Static res:Strings.SortByName}"
+                                  AutomationProperties.HelpText="{x:Static res:Strings.SortByHelp}"
+                                  AutomationProperties.LabeledBy="{Binding ElementName=SortByLabel}"
+                                  IsEnabled="{Binding IsFilterEnabled, Mode=OneWay}"
+                                  TabIndex="8"
+                                  MinWidth="130"
+                                  VerticalAlignment="Center"
+                                  SelectionChanged="OnGroupOrSortChanged">
+                            <ComboBoxItem Content="{x:Static res:Strings.SortByNameOption}" AutomationProperties.Name="{x:Static res:Strings.SortByNameOption}" AutomationProperties.PositionInSet="1" AutomationProperties.SizeOfSet="4" Tag="{x:Static vm:SortBy.Name}" />
+                            <ComboBoxItem Content="{x:Static res:Strings.SortByNamespace}" AutomationProperties.Name="{x:Static res:Strings.SortByNamespace}" AutomationProperties.PositionInSet="2" AutomationProperties.SizeOfSet="4" Tag="{x:Static vm:SortBy.Namespace}" />
+                            <ComboBoxItem Content="{x:Static res:Strings.SortBySize}" AutomationProperties.Name="{x:Static res:Strings.SortBySize}" AutomationProperties.PositionInSet="3" AutomationProperties.SizeOfSet="4" Tag="{x:Static vm:SortBy.Size}" />
+                            <ComboBoxItem Content="{x:Static res:Strings.SortByKind}" AutomationProperties.Name="{x:Static res:Strings.SortByKind}" AutomationProperties.PositionInSet="4" AutomationProperties.SizeOfSet="4" Tag="{x:Static vm:SortBy.Kind}" />
+                        </ComboBox>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Regions 3 and 4: List and Detail, side by side with a splitter -->
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="5*" MinWidth="280" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="3*" MinWidth="280" />
+                    </Grid.ColumnDefinitions>
+
+                    <GroupBox x:Name="ListRegion"
+                              Grid.Column="0"
+                              Header="{x:Static res:Strings.RegionList}"
+                              AutomationProperties.Name="{x:Static res:Strings.RegionList}"
+                              AutomationProperties.HelpText="{x:Static res:Strings.VariableListHelp}"
+                              Focusable="True"
+                              IsTabStop="False"
+                              Padding="4">
+                        <ScrollViewer x:Name="ListScroller"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Auto"
+                                      CanContentScroll="False"
+                                      Focusable="False"
+                                      AutomationProperties.Name="{x:Static res:Strings.VariableListName}">
+                            <ItemsControl x:Name="GroupsControl"
+                                          ItemsSource="{Binding List.Groups}"
+                                          KeyboardNavigation.TabNavigation="Once"
+                                          KeyboardNavigation.DirectionalNavigation="None"
+                                          TabIndex="9"
+                                          Focusable="False"
+                                          PreviewKeyDown="OnGroupsPreviewKeyDown"
+                                          PreviewMouseDown="OnGroupsPreviewMouseDown">
+                                <!--
+                                    No ItemContainerStyle: the generated containers are not automation elements
+                                    (the ItemsControlDoesNotSupportAutomation note at the top), so nothing names them
+                                    and the Expander below is the first element a screen reader meets for a group.
+                                -->
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <!--
+                                            Keyboard focus lands on the expander's header toggle button (a part of the stock
+                                            template), not on the expander itself, so the Loaded handler copies the help text
+                                            onto that button (OnGroupHeaderLoaded) and the expander keeps it as well.
+                                            NVDA also speaks the expander itself (its name, "grouping", "expanded" and this
+                                            help text) and then the group's grid ("<label> rows", "data grid") whenever focus
+                                            enters them from outside, before the row: the group-edge speech that a quick next
+                                            key cuts before the row's name (finding A2-7, re-analysis of 3 October 2026).
+                                        -->
+                                        <Expander IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
+                                                  Header="{Binding AccessibleName, Mode=OneWay}"
+                                                  AutomationProperties.Name="{Binding AccessibleName, Mode=OneWay}"
+                                                  AutomationProperties.HelpText="{x:Static res:Strings.GroupHeaderHelp}"
+                                                  TabIndex="9"
+                                                  Margin="0,0,0,4"
+                                                  Loaded="OnGroupHeaderLoaded">
+                                            <!--
+                                                The rows grid is named by the group label alone ("EFI global variable rows",
+                                                VariableGroupViewModel.RowsAccessibleName), never by the header sentence the
+                                                Expander has just spoken, and carries no help text: the list help is the List
+                                                region's and would otherwise be heard again on every entry into a group.
+                                            -->
+                                            <ListView ItemsSource="{Binding Items}"
+                                                      SelectionMode="Single"
+                                                      SelectedItem="{Binding DataContext.List.SelectedItem, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneWay}"
+                                                      AutomationProperties.Name="{Binding RowsAccessibleName, Mode=OneWay}"
+                                                      TabIndex="9"
+                                                      IsTextSearchEnabled="True"
+                                                      TextSearch.TextPath="Name"
+                                                      ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                      BorderThickness="0"
+                                                      Margin="12,0,0,0"
+                                                      SelectionChanged="OnGroupListSelectionChanged">
+                                                <ListView.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <VirtualizingStackPanel Orientation="Vertical" />
+                                                    </ItemsPanelTemplate>
+                                                </ListView.ItemsPanel>
+                                                <ListView.ItemContainerStyle>
+                                                    <Style TargetType="ListViewItem">
+                                                        <!-- No HelpText on the rows: a screen reader that reads help text on focus would repeat it after every row sentence; the list's help text is on the List region, spoken once on arrival. -->
+                                                        <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleName, Mode=OneWay}" />
+                                                        <!--
+                                                            M3 (deviation D3): the row's item status, "Changeable: order of entries" on
+                                                            BootOrder and "Changeable: one-time boot" on BootNext while they are
+                                                            changeable, "Not changeable on this machine" (since 7 October 2026) on both on a
+                                                            machine that is not the M3 test unit, empty on every other row
+                                                            (VariableItemViewModel.ItemStatus, from Core's WritabilityPolicy). What a
+                                                            screen reader speaks for it is not known, so those two rows carry the same
+                                                            words in their sentence as well.
+                                                        -->
+                                                        <Setter Property="AutomationProperties.ItemStatus" Value="{Binding ItemStatus, Mode=OneWay}" />
+                                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                                        <!--
+                                                            Low vision (round 2): every row has a border two pixels thick, transparent
+                                                            until one of the triggers below colours it, so nothing moves when it does.
+                                                            Style triggers outrank the triggers of the stock row template, so no
+                                                            template is replaced. A selected row keeps a ControlDarkDark outline while
+                                                            the list does not have focus (the stock default theme greys it out to
+                                                            almost nothing, 1.2 to 1.6:1); the focused row is outlined in Highlight,
+                                                            or, when it is also selected in a contrast theme (where every selected row
+                                                            is already filled with Highlight, focused or not), in HighlightText. A
+                                                            focused row that is not selected (after Ctrl+Up or Ctrl+Down) keeps the
+                                                            Highlight outline in a contrast theme too: it sits on the Window colour,
+                                                            where HighlightText can be the same black. The stock focus rectangle is
+                                                            drawn only after a key press, and in a contrast theme in a colour that
+                                                            nearly vanishes on Highlight (1.5 to 2.2:1).
+                                                        -->
+                                                        <Setter Property="BorderThickness" Value="2" />
+                                                        <Style.Triggers>
+                                                            <MultiTrigger>
+                                                                <MultiTrigger.Conditions>
+                                                                    <Condition Property="IsSelected" Value="True" />
+                                                                    <Condition Property="Selector.IsSelectionActive" Value="False" />
+                                                                </MultiTrigger.Conditions>
+                                                                <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}" />
+                                                            </MultiTrigger>
+                                                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                                                <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                                                            </Trigger>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding Path=(SystemParameters.HighContrast)}" Value="True" />
+                                                                    <Condition Binding="{Binding IsKeyboardFocused, RelativeSource={RelativeSource Self}}" Value="True" />
+                                                                    <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="True" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}" />
+                                                            </MultiDataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ListView.ItemContainerStyle>
+                                                <ListView.View>
+                                                    <GridView AllowsColumnReorder="False">
+                                                        <GridViewColumn Header="{x:Static res:Strings.ColumnName}" Width="150">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding Name, Mode=OneWay}" AutomationProperties.Name="{Binding Name, Mode=OneWay}" TextWrapping="Wrap" />
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        <GridViewColumn Header="{x:Static res:Strings.ColumnNamespace}" Width="170">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding NamespaceLabel, Mode=OneWay}" AutomationProperties.Name="{Binding NamespaceLabel, Mode=OneWay}" TextWrapping="Wrap" />
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        <GridViewColumn Header="{x:Static res:Strings.ColumnFlags}" Width="90">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding Flags, Mode=OneWay}" AutomationProperties.Name="{Binding Flags, Mode=OneWay}" TextWrapping="Wrap" />
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        <GridViewColumn Header="{x:Static res:Strings.ColumnSize}" Width="70">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding SizeText, Mode=OneWay}" AutomationProperties.Name="{Binding SizeText, Mode=OneWay}" TextWrapping="Wrap" />
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        <GridViewColumn Header="{x:Static res:Strings.ColumnKind}" Width="100">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding Kind, Mode=OneWay}" AutomationProperties.Name="{Binding Kind, Mode=OneWay}" TextWrapping="Wrap" />
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                        <GridViewColumn Header="{x:Static res:Strings.ColumnSummary}" Width="240">
+                                                            <GridViewColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding Summary, Mode=OneWay}" AutomationProperties.Name="{Binding Summary, Mode=OneWay}" TextWrapping="Wrap" />
+                                                                </DataTemplate>
+                                                            </GridViewColumn.CellTemplate>
+                                                        </GridViewColumn>
+                                                    </GridView>
+                                                </ListView.View>
+                                            </ListView>
+                                        </Expander>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </GroupBox>
+
+                    <!-- Ten pixels wide: a mouse target a low-vision user can hit (round 2; it was six). -->
+                    <platform:AnnouncingGridSplitter x:Name="ListDetailSplitter"
+                                                     Grid.Column="1"
+                                                     Width="10"
+                                                     HorizontalAlignment="Center"
+                                                     VerticalAlignment="Stretch"
+                                                     ResizeDirection="Columns"
+                                                     ResizeBehavior="PreviousAndNext"
+                                                     Kind="ListAndDetails"
+                                                     AutomationProperties.Name="{x:Static res:Strings.ListDetailSplitterName}"
+                                                     AutomationProperties.HelpText="{x:Static res:Strings.ListDetailSplitterHelp}"
+                                                     TabIndex="10"
+                                                     Margin="2,0" />
+
+                    <!-- Any entry of keyboard focus into the pane runs the pending detail refresh first (finding A1-6; the note on SectionsControl). -->
+                    <GroupBox x:Name="DetailRegion"
+                              Grid.Column="2"
+                              Header="{x:Static res:Strings.RegionDetail}"
+                              AutomationProperties.Name="{x:Static res:Strings.RegionDetail}"
+                              Padding="4"
+                              PreviewGotKeyboardFocus="OnDetailPreviewGotKeyboardFocus">
+                        <ScrollViewer x:Name="DetailPane"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      Focusable="False"
+                                      AutomationProperties.Name="{x:Static res:Strings.DetailPaneName}"
+                                      AutomationProperties.HelpText="{x:Static res:Strings.DetailPaneHelp}"
+                                      PreviewKeyDown="OnDetailPreviewKeyDown">
+                            <StackPanel Margin="4">
+                                <!-- The heading is the system font size scaled by a quarter (a LayoutTransform, so it follows the Windows text size like everything else). -->
+                                <TextBlock x:Name="DetailHeading"
+                                           Text="{Binding Detail.Heading, Mode=OneWay}"
+                                           AutomationProperties.Name="{Binding Detail.Heading, Mode=OneWay}"
+                                           AutomationProperties.HelpText="{x:Static res:Strings.DetailPaneHelp}"
+                                           AutomationProperties.HeadingLevel="Level1"
+                                           Focusable="True"
+                                           KeyboardNavigation.TabIndex="11"
+                                           FontWeight="Bold"
+                                           TextWrapping="Wrap"
+                                           Margin="0,0,0,6">
+                                    <TextBlock.LayoutTransform>
+                                        <ScaleTransform ScaleX="1.25" ScaleY="1.25" />
+                                    </TextBlock.LayoutTransform>
+                                </TextBlock>
+                                <ItemsControl x:Name="SectionsControl"
+                                              ItemsSource="{Binding Detail.Sections, Mode=OneWay}"
+                                              Focusable="False"
+                                              GotKeyboardFocus="OnDetailFieldGotKeyboardFocus"
+                                              LostKeyboardFocus="OnDetailFieldLostKeyboardFocus">
+                                    <!--
+                                        With no variable selected this control has no items and therefore no size. It
+                                        was collapsed when it still had an automation peer: an on-screen element with a
+                                        null bounding rectangle is an Accessibility Insights failure (rule
+                                        BoundingRectangleNotNull), the only one in the idle window. Under the
+                                        ItemsControlDoesNotSupportAutomation switch (the note at the top) a plain
+                                        ItemsControl has no peer at all, so the collapse is now a safeguard in case the
+                                        switch is ever removed, and it keeps the empty control out of the layout. The
+                                        heading above already reads "No variable selected", so collapsing costs nothing.
+                                        A DataTrigger on the control's own HasItems: a style trigger like the one
+                                        DetailFieldStyle already uses, not a control template - the stock template is
+                                        untouched.
+                                    -->
+                                    <ItemsControl.Style>
+                                        <Style TargetType="ItemsControl">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding HasItems, RelativeSource={RelativeSource Self}, Mode=OneWay}" Value="False">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ItemsControl.Style>
+                                    <!--
+                                        Finding A1-6: the detail pane is not updated inside the key press that changed the
+                                        selection. The shell hands the update to Platform/DispatcherDetailScheduler.cs (the
+                                        CoalescingDetailScheduler policy over the dispatcher): the window holds the update
+                                        from the moment a key or a mouse button goes down in the variable list until it comes
+                                        up (GroupsControl PreviewKeyDown and PreviewMouseDown hold; the window's PreviewKeyUp,
+                                        PreviewMouseUp and Deactivated release), and the release starts a quiet period of 300
+                                        ms (Presentation DetailRefreshTiming.QuietPeriod, the scheduler's one timer): only when
+                                        it passes with no key or button going down in the list is one Dispatcher.BeginInvoke
+                                        posted at Background priority (served only when no input is waiting) that runs the
+                                        newest refresh. Alpha 2 finding A2-7 (the tester's A2-5): separate quick presses, 150 to 250
+                                        ms apart, each cost an update right after the key came up while NVDA was still reading
+                                        the row; now a burst of them costs one, after the last. Nothing the person asks for
+                                        waits: every entry of keyboard focus into this pane runs the pending refresh first
+                                        (FocusFirstDetailField for Enter, Space and F6; OnDetailPreviewGotKeyboardFocus on
+                                        DetailRegion for Tab, a click and a screen reader's focus request), so focus never
+                                        lands in stale details; an Alt key anywhere in the window runs it too
+                                        (OnWindowPreviewKeyDown), so every access key, the Change group's among them, acts on
+                                        the selected row, and so do Copy value, Export visible list and every Change command
+                                        themselves (ShellViewModel.RunChangeAsync).
+                                        The sections and the fields keep the stock StackPanel: a
+                                        VirtualizingStackPanel virtualises only inside the scroll viewer of its own
+                                        ItemsControl's template, which a plain ItemsControl has not (the scroll viewer here
+                                        is the pane's), and even where it worked it would hide the fields that are not
+                                        realised from Tab, from FocusFirstDetailField and from a screen reader walking the
+                                        tree, so the cost of the pane is kept down by refreshing it less often instead.
+                                        The update itself is made in place (the A16 measurement on the OptiPlex 7020: removing
+                                        and re-creating every section and field raised about 80 StructureChanged and 70
+                                        PropertyChanged UI Automation events, and the next row's focus event reached NVDA up
+                                        to about 215 ms late). Detail.Sections and the Fields of each section are collections
+                                        that are never replaced, cleared or reset: a row change keeps every section and field
+                                        the two rows both have in the same order, with its group, label and box and their
+                                        automation elements, changes only the box's text and help text (Value and HelpText,
+                                        notifying properties), and inserts or removes, one at a time, only the sections and
+                                        fields that differ.
+                                        The window starts every kept box that does not have keyboard focus at its top again
+                                        (caret and scroll position), as a new box started (OnDetailPropertyChanged).
+                                    -->
+                                    <!-- No ItemContainerStyle: the containers are not automation elements (note at the top); the GroupBox is the section's one element, named by its title. -->
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <GroupBox AutomationProperties.Name="{Binding Title, Mode=OneWay}" Margin="0,0,0,6" Padding="4">
+                                                <GroupBox.Header>
+                                                    <TextBlock Text="{Binding Title, Mode=OneWay}"
+                                                               AutomationProperties.Name="{Binding Title, Mode=OneWay}"
+                                                               AutomationProperties.HeadingLevel="Level2"
+                                                               FontWeight="SemiBold" />
+                                                </GroupBox.Header>
+                                                <!--
+                                                    Label above value, each field the full width of the pane: a label as long as
+                                                    EFI_VARIABLE_TIME_BASED_AUTHENTICATED_WRITE_ACCESS wraps instead of squeezing
+                                                    the value box, at any text size. The label block is named by the label alone
+                                                    (it shows nothing else); the value box is named by the label alone too
+                                                    (DetailFieldViewModel.AccessibleName, "Raw data, hex dump" for the hex box)
+                                                    and exposes the value through the Value pattern, so a screen reader arriving
+                                                    on a field hears the label once and the value once, never the value twice.
+                                                -->
+                                                <ItemsControl ItemsSource="{Binding Fields, Mode=OneWay}" Focusable="False">
+                                                    <!-- No ItemContainerStyle: the containers are not automation elements (note at the top); a field is its label block and its value box, nothing in front of them. -->
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <StackPanel Margin="0,2,0,4">
+                                                                <TextBlock Text="{Binding Label, Mode=OneWay}"
+                                                                           AutomationProperties.Name="{Binding Label, Mode=OneWay}"
+                                                                           Margin="0,0,0,2"
+                                                                           TextWrapping="Wrap" />
+                                                                <TextBox Text="{Binding Value, Mode=OneWay}"
+                                                                         AutomationProperties.Name="{Binding AccessibleName, Mode=OneWay}"
+                                                                         AutomationProperties.HelpText="{Binding HelpText, Mode=OneWay}"
+                                                                         AutomationProperties.LabeledBy="{Binding Header, RelativeSource={RelativeSource AncestorType=GroupBox}}"
+                                                                         Style="{StaticResource DetailFieldStyle}"
+                                                                         TabIndex="12" />
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </GroupBox>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <!--
+                                    The Writability line: the selected variable's own sentence from Core's
+                                    WritabilityPolicy (M3), "No variable selected" with nothing selected. Wraps and is
+                                    selected whole when keyboard focus arrives, like every single-line field
+                                    (DetailFieldStyle): NVDA reads it whole, to its last word.
+                                -->
+                                <TextBox x:Name="ReadOnlyStatusBox"
+                                         Text="{Binding Detail.ReadOnlyStatus, Mode=OneWay, FallbackValue={x:Static res:Strings.NoSelectionHeading}}"
+                                         AutomationProperties.Name="{x:Static res:Strings.ReadOnlyStatusName}"
+                                         AutomationProperties.HelpText="{x:Static res:Strings.DetailFieldHelp}"
+                                         IsReadOnly="True"
+                                         IsReadOnlyCaretVisible="True"
+                                         TextWrapping="Wrap"
+                                         TabIndex="13"
+                                         Margin="0,4,0,0"
+                                         GotKeyboardFocus="OnReadOnlyStatusGotKeyboardFocus"
+                                         LostKeyboardFocus="OnReadOnlyStatusLostKeyboardFocus" />
+
+                                <!--
+                                    The Change group: collapsed unless the Presentation
+                                    surface shows it, and inside it only the controls of the variable shown. For
+                                    BootOrder: the Boot order entries list (the proposed order, a copy of the
+                                    firmware's), Move up, Move down and Review change. For an active category-Boot
+                                    Boot####: Boot once from this entry. For BootNext: Clear one-time boot. Restore
+                                    previous value joins BootOrder's and BootNext's controls when a snapshot of that
+                                    variable exists. Every button is a stock button with its label's access key
+                                    (Alt+U, Alt+D, Alt+V, Alt+B, Alt+M, Alt+P, which work from anywhere in the window
+                                    while the button is shown; the Alt key first brings the detail pane up to date,
+                                    finding A2-7, so the buttons are those of the selected row), the same
+                                    "Alt+<letter>" as the toolbar reports, and a
+                                    command; none writes by itself: Review change, Boot once from this entry, Clear
+                                    one-time boot and Restore previous value run the checks and then open the Confirm
+                                    change dialog, and only that dialog's Confirm change writes. A command that would
+                                    change nothing answers with a sentence instead of being disabled, because a
+                                    disabled button would swallow its access key; every command is disabled only while
+                                    the checks or a write run. The keys of the list that stock WPF does not give
+                                    (Ctrl+Z, and Enter and Space doing nothing on a row) are the code-behind's
+                                    (OnBootOrderListPreviewKeyDown); Escape anywhere in the group is the pane's rule,
+                                    back to the variable list at the same row.
+                                -->
+                                <GroupBox x:Name="ChangeGroup"
+                                          Header="{x:Static res:Strings.ChangeGroupName}"
+                                          AutomationProperties.Name="{x:Static res:Strings.ChangeGroupName}"
+                                          AutomationProperties.HelpText="{x:Static res:Strings.ChangeGroupHelp}"
+                                          Visibility="{Binding Detail.Change.IsVisible, Mode=OneWay, Converter={x:Static app:MainWindow.VisibleWhenTrue}}"
+                                          Margin="0,8,0,0"
+                                          Padding="4">
+                                    <StackPanel>
+                                        <StackPanel x:Name="BootOrderControls"
+                                                    Visibility="{Binding Detail.Change.ShowsBootOrderControls, Mode=OneWay, Converter={x:Static app:MainWindow.VisibleWhenTrue}}">
+                                            <TextBlock x:Name="BootOrderEntriesLabel"
+                                                       Text="{x:Static res:Strings.BootOrderEntriesName}"
+                                                       AutomationProperties.Name="{x:Static res:Strings.BootOrderEntriesName}"
+                                                       TextWrapping="Wrap"
+                                                       Margin="0,0,0,2" />
+                                            <!--
+                                                One row per entry of the proposed order, single selection: Up and Down
+                                                select, Ctrl+Up and Ctrl+Down move focus without selecting (stock), and a
+                                                move rearranges the collection the list shows, so the moved row keeps its
+                                                container; should WPF regenerate it, the window puts focus back on it
+                                                (FocusTarget.BootOrderEntry). The list help is heard once, on arrival.
+                                            -->
+                                            <ListBox x:Name="BootOrderList"
+                                                     ItemsSource="{Binding Detail.Change.Editor.Entries, Mode=OneWay}"
+                                                     SelectedItem="{Binding Detail.Change.Editor.SelectedEntry, Mode=TwoWay}"
+                                                     SelectionMode="Single"
+                                                     ItemContainerStyle="{StaticResource BootOrderRowStyle}"
+                                                     AutomationProperties.Name="{x:Static res:Strings.BootOrderEntriesName}"
+                                                     AutomationProperties.HelpText="{x:Static res:Strings.BootOrderEntriesHelp}"
+                                                     AutomationProperties.LabeledBy="{Binding ElementName=BootOrderEntriesLabel}"
+                                                     TabIndex="14"
+                                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                     PreviewKeyDown="OnBootOrderListPreviewKeyDown">
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding AccessibleName, Mode=OneWay}" AutomationProperties.Name="{Binding AccessibleName, Mode=OneWay}" TextWrapping="Wrap" />
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
+                                            <WrapPanel x:Name="BootOrderButtons" Orientation="Horizontal" Margin="0,6,0,0">
+                                                <Button x:Name="MoveUpButton"
+                                                        Content="{x:Static res:Strings.MoveUpLabel}"
+                                                        AutomationProperties.Name="{x:Static res:Strings.MoveUpName}"
+                                                        AutomationProperties.HelpText="{x:Static res:Strings.MoveUpHelp}"
+                                                        AutomationProperties.AccessKey="{x:Static res:Strings.MoveUpAccessKey}"
+                                                        AutomationProperties.AcceleratorKey="{x:Static res:Strings.MoveUpAccessKey}"
+                                                        Command="{Binding Detail.Change.MoveUpCommand}"
+                                                        Style="{StaticResource ToolbarButtonStyle}"
+                                                        TabIndex="15" />
+                                                <Button x:Name="MoveDownButton"
+                                                        Content="{x:Static res:Strings.MoveDownLabel}"
+                                                        AutomationProperties.Name="{x:Static res:Strings.MoveDownName}"
+                                                        AutomationProperties.HelpText="{x:Static res:Strings.MoveDownHelp}"
+                                                        AutomationProperties.AccessKey="{x:Static res:Strings.MoveDownAccessKey}"
+                                                        AutomationProperties.AcceleratorKey="{x:Static res:Strings.MoveDownAccessKey}"
+                                                        Command="{Binding Detail.Change.MoveDownCommand}"
+                                                        Style="{StaticResource ToolbarButtonStyle}"
+                                                        TabIndex="16" />
+                                                <Button x:Name="ReviewChangeButton"
+                                                        Content="{x:Static res:Strings.ReviewChangeLabel}"
+                                                        AutomationProperties.Name="{x:Static res:Strings.ReviewChangeName}"
+                                                        AutomationProperties.HelpText="{x:Static res:Strings.ReviewChangeHelp}"
+                                                        AutomationProperties.AccessKey="{x:Static res:Strings.ReviewChangeAccessKey}"
+                                                        AutomationProperties.AcceleratorKey="{x:Static res:Strings.ReviewChangeAccessKey}"
+                                                        Command="{Binding Detail.Change.ReviewChangeCommand}"
+                                                        Style="{StaticResource ToolbarButtonStyle}"
+                                                        TabIndex="17" />
+                                            </WrapPanel>
+                                        </StackPanel>
+                                        <WrapPanel x:Name="OneTimeBootButtons" Orientation="Horizontal">
+                                            <Button x:Name="BootOnceButton"
+                                                    Content="{x:Static res:Strings.BootOnceLabel}"
+                                                    AutomationProperties.Name="{x:Static res:Strings.BootOnceName}"
+                                                    AutomationProperties.HelpText="{x:Static res:Strings.BootOnceHelp}"
+                                                    AutomationProperties.AccessKey="{x:Static res:Strings.BootOnceAccessKey}"
+                                                    AutomationProperties.AcceleratorKey="{x:Static res:Strings.BootOnceAccessKey}"
+                                                    Command="{Binding Detail.Change.BootOnceCommand}"
+                                                    Visibility="{Binding Detail.Change.ShowsBootOnce, Mode=OneWay, Converter={x:Static app:MainWindow.VisibleWhenTrue}}"
+                                                    Style="{StaticResource ToolbarButtonStyle}"
+                                                    TabIndex="18" />
+                                            <Button x:Name="ClearBootNextButton"
+                                                    Content="{x:Static res:Strings.ClearBootNextLabel}"
+                                                    AutomationProperties.Name="{x:Static res:Strings.ClearBootNextName}"
+                                                    AutomationProperties.HelpText="{x:Static res:Strings.ClearBootNextHelp}"
+                                                    AutomationProperties.AccessKey="{x:Static res:Strings.ClearBootNextAccessKey}"
+                                                    AutomationProperties.AcceleratorKey="{x:Static res:Strings.ClearBootNextAccessKey}"
+                                                    Command="{Binding Detail.Change.ClearBootNextCommand}"
+                                                    Visibility="{Binding Detail.Change.ShowsClearBootNext, Mode=OneWay, Converter={x:Static app:MainWindow.VisibleWhenTrue}}"
+                                                    Style="{StaticResource ToolbarButtonStyle}"
+                                                    TabIndex="19" />
+                                            <Button x:Name="RestorePreviousButton"
+                                                    Content="{x:Static res:Strings.RestorePreviousLabel}"
+                                                    AutomationProperties.Name="{x:Static res:Strings.RestorePreviousName}"
+                                                    AutomationProperties.HelpText="{x:Static res:Strings.RestorePreviousHelp}"
+                                                    AutomationProperties.AccessKey="{x:Static res:Strings.RestorePreviousAccessKey}"
+                                                    AutomationProperties.AcceleratorKey="{x:Static res:Strings.RestorePreviousAccessKey}"
+                                                    Command="{Binding Detail.Change.RestorePreviousCommand}"
+                                                    Visibility="{Binding Detail.Change.ShowsRestore, Mode=OneWay, Converter={x:Static app:MainWindow.VisibleWhenTrue}}"
+                                                    Style="{StaticResource ToolbarButtonStyle}"
+                                                    TabIndex="20" />
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </GroupBox>
+                </Grid>
+
+                <!-- The spoken share is the log panel's, the row after the splitter (TracksNextDefinition); ten pixels high, like the other splitter. -->
+                <platform:AnnouncingGridSplitter x:Name="LogSplitter"
+                                                 Grid.Row="3"
+                                                 Height="10"
+                                                 HorizontalAlignment="Stretch"
+                                                 VerticalAlignment="Center"
+                                                 ResizeDirection="Rows"
+                                                 ResizeBehavior="PreviousAndNext"
+                                                 TracksNextDefinition="True"
+                                                 Kind="LogPanel"
+                                                 AutomationProperties.Name="{x:Static res:Strings.LogSplitterName}"
+                                                 AutomationProperties.HelpText="{x:Static res:Strings.LogSplitterHelp}"
+                                                 TabIndex="21"
+                                                 Margin="0,2" />
+
+                <!-- Region 5: Log -->
+                <GroupBox x:Name="LogRegion"
+                          Grid.Row="4"
+                          Header="{x:Static res:Strings.RegionLog}"
+                          AutomationProperties.Name="{x:Static res:Strings.RegionLog}"
+                          Padding="4">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ListBox x:Name="LogList"
+                                 Grid.Column="0"
+                                 ItemsSource="{Binding Log.Lines}"
+                                 SelectionMode="Single"
+                                 AutomationProperties.Name="{x:Static res:Strings.LogPanelName}"
+                                 AutomationProperties.HelpText="{x:Static res:Strings.LogPanelHelp}"
+                                 AutomationProperties.LiveSetting="Off"
+                                 ItemContainerStyle="{StaticResource LogLineStyle}"
+                                 TabIndex="22"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock TextWrapping="Wrap" AutomationProperties.Name="{Binding AccessibleName, Mode=OneWay}">
+                                        <TextBlock.Text>
+                                            <MultiBinding StringFormat="{}{0} {1} {2}">
+                                                <Binding Path="Level" Mode="OneWay" />
+                                                <Binding Path="Time" Mode="OneWay" />
+                                                <Binding Path="Message" Mode="OneWay" />
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <!-- Sizes to its text: no Height, MinHeight or MaxHeight, and the log row above keeps room for it at any text size (the note on the row definitions). -->
+                        <Button x:Name="CopyLogButton"
+                                Grid.Column="1"
+                                Content="{x:Static res:Strings.CopyLogLabel}"
+                                AutomationProperties.Name="{x:Static res:Strings.CopyLogName}"
+                                AutomationProperties.HelpText="{x:Static res:Strings.CopyLogHelp}"
+                                AutomationProperties.AccessKey="{x:Static res:Strings.CopyLogAccessKey}"
+                                AutomationProperties.AcceleratorKey="{x:Static res:Strings.CopyLogAccessKey}"
+                                Command="{Binding CopyLogCommand}"
+                                Style="{StaticResource ToolbarButtonStyle}"
+                                TabIndex="23"
+                                VerticalAlignment="Top"
+                                Margin="8,0,0,0" />
+                    </Grid>
+                </GroupBox>
+
+                <!--
+                    Region 6: Dell settings. Shows a short, agreed list of
+                    this computer's Dell BIOS settings and changes none of them. They are read only when Read
+                    Dell settings (Alt+S) is pressed: never when the window opens, never by Refresh or Open
+                    baseline folder, never on a timer; a baseline folder shows the settings it recorded.
+                    Three stops, in document order, in a grid of three Auto rows: the Read Dell settings
+                    button (24), never disabled (no IsEnabled binding; its command can always run, so Alt+S
+                    always answers, also while a read runs, and focus is never lost under the button); the
+                    state line Dell settings source (25), a read-only box that says when and where the
+                    values were loaded, or why they could not be, selected whole when keyboard focus arrives
+                    on it (the value boxes' arrival rule, OnDellSourceGotKeyboardFocus: without it NVDA reads
+                    a wrapped value only to the end of its first line); and the list Dell BIOS settings (26),
+                    a ListView in GridView mode, one tab stop, one row per agreed setting.
+                    The rows exist from the start, the first one selected, and every read, baseline folder
+                    or return to the live view changes their texts in place: no row is ever added, removed
+                    or re-created (findings A1-6 and A2-7, a burst of UI Automation events delays the screen
+                    reader), and nothing is collapsed or shown. The list is not virtualised, so all its rows
+                    are always in the UI Automation tree, and it scrolls inside, its height capped by
+                    FitPanesToWindow. A letter jumps to the next row whose name starts with it (stock text
+                    search); Ctrl+C copies the row's sentence, and Enter and Space do nothing, there being no
+                    detail pane (OnDellListPreviewKeyDown). The group has no help text (it would be heard on
+                    every F6); its two keyboard focus handlers tell the shell which part has focus, so that
+                    Copy value (Alt+Y) copies the Dell row or the state line there, never a firmware
+                    variable's value. The Status box stays the only live region.
+                -->
+                <GroupBox x:Name="DellRegion"
+                          Grid.Row="5"
+                          Header="{x:Static res:Strings.RegionDell}"
+                          AutomationProperties.Name="{x:Static res:Strings.RegionDell}"
+                          Padding="6,4"
+                          Margin="0,4,0,0"
+                          SizeChanged="OnLayoutPartSizeChanged"
+                          GotKeyboardFocus="OnDellRegionGotKeyboardFocus"
+                          LostKeyboardFocus="OnDellRegionLostKeyboardFocus">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Button x:Name="ReadDellSettingsButton"
+                                Grid.Row="0"
+                                HorizontalAlignment="Left"
+                                Content="{x:Static res:Strings.ReadDellSettingsLabel}"
+                                AutomationProperties.Name="{x:Static res:Strings.ReadDellSettingsName}"
+                                AutomationProperties.HelpText="{x:Static res:Strings.ReadDellSettingsHelp}"
+                                AutomationProperties.AccessKey="{x:Static res:Strings.ReadDellSettingsAccessKey}"
+                                AutomationProperties.AcceleratorKey="{x:Static res:Strings.ReadDellSettingsAccessKey}"
+                                Command="{Binding ReadDellSettingsCommand}"
+                                Style="{StaticResource ToolbarButtonStyle}"
+                                TabIndex="24" />
+                        <TextBox x:Name="DellSourceBox"
+                                 Grid.Row="1"
+                                 Text="{Binding Dell.StateText, Mode=OneWay}"
+                                 AutomationProperties.Name="{x:Static res:Strings.DellSourceName}"
+                                 AutomationProperties.HelpText="{x:Static res:Strings.DellSourceHelp}"
+                                 IsReadOnly="True"
+                                 IsReadOnlyCaretVisible="True"
+                                 TextWrapping="Wrap"
+                                 TabIndex="25"
+                                 Margin="0,0,0,4"
+                                 GotKeyboardFocus="OnDellSourceGotKeyboardFocus"
+                                 LostKeyboardFocus="OnDellSourceLostKeyboardFocus" />
+                        <ListView x:Name="DellSettingsList"
+                                  Grid.Row="2"
+                                  ItemsSource="{Binding Dell.Rows, Mode=OneWay}"
+                                  SelectedItem="{Binding Dell.SelectedRow, Mode=TwoWay}"
+                                  SelectionMode="Single"
+                                  AutomationProperties.Name="{x:Static res:Strings.DellSettingsListName}"
+                                  AutomationProperties.HelpText="{x:Static res:Strings.DellSettingsListHelp}"
+                                  ItemContainerStyle="{StaticResource DellSettingRowStyle}"
+                                  VirtualizingPanel.IsVirtualizing="False"
+                                  IsTextSearchEnabled="True"
+                                  TextSearch.TextPath="DisplayName"
+                                  TabIndex="26"
+                                  PreviewKeyDown="OnDellListPreviewKeyDown">
+                            <ListView.View>
+                                <GridView AllowsColumnReorder="False">
+                                    <GridViewColumn Header="{x:Static res:Strings.ColumnDellSetting}" Width="220">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding DisplayName, Mode=OneWay}" AutomationProperties.Name="{Binding DisplayName, Mode=OneWay}" TextWrapping="Wrap" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn Header="{x:Static res:Strings.ColumnDellCurrent}" Width="220">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding CurrentText, Mode=OneWay}" AutomationProperties.Name="{Binding CurrentText, Mode=OneWay}" TextWrapping="Wrap" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn Header="{x:Static res:Strings.ColumnDellPossible}" Width="420">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding PossibleText, Mode=OneWay}" AutomationProperties.Name="{Binding PossibleText, Mode=OneWay}" TextWrapping="Wrap" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+                    </Grid>
+                </GroupBox>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Region 7: Status (the machine identity strip and the only polite live region), in the row of its own at the bottom -->
+        <GroupBox x:Name="StatusRegion"
+                  Grid.Row="1"
+                  Header="{x:Static res:Strings.RegionStatus}"
+                  AutomationProperties.Name="{x:Static res:Strings.RegionStatus}"
+                  Padding="6,4"
+                  Margin="0,4,0,0">
+            <StackPanel>
+                <WrapPanel x:Name="IdentityPanel" Orientation="Horizontal" Margin="0,0,0,4">
+                    <TextBlock Text="{Binding SourceDescription, Mode=OneWay, FallbackValue={x:Static res:Strings.LiveSourceName}}" AutomationProperties.Name="{Binding SourceDescription, Mode=OneWay, FallbackValue={x:Static res:Strings.LiveSourceName}}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,16,2" />
+                    <TextBlock Text="{Binding Manufacturer, Mode=OneWay}" AutomationProperties.Name="{Binding Manufacturer, Mode=OneWay}" TextWrapping="Wrap" Margin="0,0,16,2" />
+                    <TextBlock Text="{Binding Model, Mode=OneWay}" AutomationProperties.Name="{Binding Model, Mode=OneWay}" TextWrapping="Wrap" Margin="0,0,16,2" />
+                    <TextBlock Text="{Binding BiosVersion, Mode=OneWay}" AutomationProperties.Name="{Binding BiosVersion, Mode=OneWay}" TextWrapping="Wrap" Margin="0,0,16,2" />
+                    <TextBlock Text="{Binding ServiceTag, Mode=OneWay}" AutomationProperties.Name="{Binding ServiceTag, Mode=OneWay}" TextWrapping="Wrap" Margin="0,0,16,2" />
+                    <TextBlock Text="{Binding Cpu, Mode=OneWay}" AutomationProperties.Name="{Binding Cpu, Mode=OneWay}" TextWrapping="Wrap" Margin="0,0,16,2" />
+                    <TextBlock Text="{Binding OperatingSystem, Mode=OneWay}" AutomationProperties.Name="{Binding OperatingSystem, Mode=OneWay}" TextWrapping="Wrap" Margin="0,0,16,2" />
+                    <TextBlock Text="{Binding ExpectedModelText, Mode=OneWay}" AutomationProperties.Name="{Binding ExpectedModelText, Mode=OneWay}" TextWrapping="Wrap" Margin="0,0,16,2" />
+                </WrapPanel>
+                <TextBox x:Name="StatusBox"
+                         Text="{Binding StatusText, Mode=OneWay}"
+                         AutomationProperties.HelpText="{x:Static res:Strings.StatusHelp}"
+                         AutomationProperties.LiveSetting="Polite"
+                         IsReadOnly="True"
+                         IsReadOnlyCaretVisible="True"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto"
+                         MinHeight="44"
+                         MaxHeight="120"
+                         TabIndex="27">
+                    <!--
+                        The spoken name carries the text on purpose: NVDA and Narrator speak a live region's
+                        *name* when LiveRegionChanged is raised, and a TextBox's name does not follow its text
+                        the way a TextBlock's does. Naming the box "Status" alone would make every announcement
+                        say "Status" and nothing else. The price is that Tab or F6 onto the box reads the
+                        message as the name and again as the value;
+                        the detail fields, which are not live regions, are named by their labels alone.
+                    -->
+                    <AutomationProperties.Name>
+                        <MultiBinding StringFormat="{}{0}: {1}">
+                            <Binding Source="{x:Static res:Strings.StatusName}" />
+                            <Binding Path="Text" RelativeSource="{RelativeSource Self}" Mode="OneWay" />
+                        </MultiBinding>
+                    </AutomationProperties.Name>
+                </TextBox>
+            </StackPanel>
+        </GroupBox>
+    </Grid>
+</Window>

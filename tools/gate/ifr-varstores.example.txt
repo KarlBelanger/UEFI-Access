@@ -1,0 +1,60 @@
+# ifr-varstores.example.txt: example input for "uefiaccess gate --ifr-varstores <file>"
+#
+# Format: one varstore per line, three fields separated by semicolons:
+#
+#     Name;GUID;Size
+#
+#   Name  the varstore name as IFRExtractor-RS prints it (case-sensitive; it is the UEFI variable
+#         name the firmware uses for that varstore, for example Setup). Write it without the
+#         double quotes IFRExtractor-RS puts around it; if you copy them ("Setup"), the tool
+#         removes them.
+#   GUID  the varstore GUID as 8-4-4-4-12 hexadecimal digits; braces are optional and letter case
+#         does not matter
+#   Size  the varstore size in bytes, either copied exactly as IFRExtractor-RS prints it, in
+#         hexadecimal with the 0x prefix (for example 0x2E5), or in decimal (741). Hexadecimal
+#         without the 0x prefix (2E5) is not accepted.
+#
+# Lines starting with # and blank lines are ignored; whitespace around a field is trimmed. A line
+# that does not parse is reported in gate.json under varstoreMatch.parseErrors with its line
+# number (and as a "Warning: ifr-varstores:" line on standard error) and skipped. A file that does
+# not exist or cannot be read stops the gate with exit code 2 and one sentence on standard error.
+#
+# The tool marks every line as present at runtime (with the variable's attributes and whether the
+# runtime size equals Size), absent, or unknown, in gate.json under varstoreMatch.entries and in
+# the "Varstore match" table it prints. Absent means either boot-service only (no RT attribute, so
+# never visible to Windows) or not stored as a UEFI variable at all; the tool cannot tell which.
+# Only variables with EFI_VARIABLE_RUNTIME_ACCESS are visible to the operating system. Unknown
+# appears only when the variable enumeration was incomplete (varstoreMatch.enumerationComplete is
+# false) and a direct read of the varstore failed too; varstoreMatch.unknownCount counts them, and
+# outcome C can be ruled out only when that count is 0.
+#
+# How to produce the real file (M1-Design.md section 13 (c); on the developer workstation, never on
+# the target unit):
+#
+#   1. Read the installed BIOS version from "uefiaccess info" (for example A18) and download that
+#      BIOS update from Dell support by service tag. It is a Windows executable in a Dell PFS
+#      container. If the exact version is no longer downloadable, update the BIOS to the latest
+#      A-series release first (with the client's agreement) and extract that package.
+#   2. Extract the PFS container with BIOSUtilities ("Dell PFS Update Extractor",
+#      Dell_PFS_Extract.py <package.exe>). The UEFI image is the largest .bin in the output.
+#   3. Open the image in UEFITool NE. Search (Ctrl+F) for the text "Setup" and "SetupUtility" and
+#      for HII form GUIDs. For every module that contains an HII form package, right-click its
+#      PE32 image section and choose "Extract body...".
+#   4. Run IFRExtractor-RS on each extracted body ("ifrextractor <body.bin>"). The output lists
+#      the varstores, for example:
+#        VarStore Guid: EC87D643-EBA4-4BB5-A1E5-3F3E36B20DA9, VarStoreId: 0x1, Size: 0x2E5, Name: "Setup"
+#      (VarStoreEfi lines count too). Collect every distinct varstore: name, GUID, size.
+#   5. Write them here as Name;GUID;Size (that example becomes
+#      Setup;EC87D643-EBA4-4BB5-A1E5-3F3E36B20DA9;0x2E5), save the file as ifr-varstores.txt,
+#      and run on the target unit:
+#        uefiaccess gate --ifr-varstores ifr-varstores.txt
+#      or tools\gate\Run-Gate.ps1 -IfrVarstores ifr-varstores.txt
+#   6. For every varstore reported present at runtime, confirm its runtime size equals the IFR
+#      size, and record the result in section 4 of docs\M1-gate-memo-template.md.
+#
+# The three lines below are examples only: well-known Intel reference-code varstore names and
+# GUIDs with made-up sizes. Dell's own firmware on the 2014 OptiPlex 7020 will have different
+# names, GUIDs, and sizes; replace them with what IFRExtractor-RS reports.
+Setup;EC87D643-EBA4-4BB5-A1E5-3F3E36B20DA9;0x2E5
+PchSetup;4570B7F1-ADE8-4943-8DC3-406472842384;51
+SaSetup;72C5E28C-7783-43A1-8767-FAD73FCCAFA4;44

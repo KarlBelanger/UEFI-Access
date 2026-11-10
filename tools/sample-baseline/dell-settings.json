@@ -1,0 +1,206 @@
+{
+  "Format": "uefiaccess-dell-settings/1",
+  "ReadAtUtc": "2026-09-15T12:00:00Z",
+  "Outcome": "Complete",
+  "Source": "DellCommandMonitor",
+  "Machine": {
+    "Manufacturer": "Sample (fixtures)",
+    "Model": "Sample (fixtures)",
+    "BiosVersion": "Sample (fixtures)"
+  },
+  "Settings": [
+    {
+      "Id": "BootListOption",
+      "State": "Read",
+      "CurrentToken": "2",
+      "CurrentVendorName": "UEFI",
+      "PossibleValues": [
+        {
+          "Token": "1",
+          "VendorName": "BIOS"
+        },
+        {
+          "Token": "2",
+          "VendorName": "UEFI"
+        }
+      ],
+      "PossibleValuesOrigin": "Interface",
+      "VendorMarksReadOnly": false
+    },
+    {
+      "Id": "SecureBoot",
+      "State": "Read",
+      "CurrentToken": "2",
+      "CurrentVendorName": "Enable",
+      "PossibleValues": [
+        {
+          "Token": "2",
+          "VendorName": "Enable"
+        }
+      ],
+      "PossibleValuesOrigin": "Interface",
+      "VendorMarksReadOnly": false
+    },
+    {
+      "Id": "SataOperation",
+      "State": "Read",
+      "CurrentToken": "4",
+      "CurrentVendorName": "AHCI",
+      "PossibleValues": [
+        {
+          "Token": "1",
+          "VendorName": "Off"
+        },
+        {
+          "Token": "3",
+          "VendorName": "ATA"
+        },
+        {
+          "Token": "4",
+          "VendorName": "AHCI"
+        }
+      ],
+      "PossibleValuesOrigin": "Interface",
+      "VendorMarksReadOnly": false
+    },
+    {
+      "Id": "TpmSecurity",
+      "State": "Read",
+      "CurrentToken": "1",
+      "CurrentVendorName": "Enable",
+      "PossibleValues": [
+        {
+          "Token": "1",
+          "VendorName": "Enable"
+        },
+        {
+          "Token": "2",
+          "VendorName": "Disable"
+        }
+      ],
+      "PossibleValuesOrigin": "Interface",
+      "VendorMarksReadOnly": false
+    },
+    {
+      "Id": "TpmActivation",
+      "State": "Read",
+      "CurrentToken": "2",
+      "CurrentVendorName": "Activate",
+      "PossibleValues": [
+        {
+          "Token": "1",
+          "VendorName": "Deactivate"
+        },
+        {
+          "Token": "2",
+          "VendorName": "Activate"
+        }
+      ],
+      "PossibleValuesOrigin": "Interface",
+      "VendorMarksReadOnly": false
+    },
+    {
+      "Id": "Virtualization",
+      "State": "Read",
+      "CurrentToken": "2",
+      "CurrentVendorName": "Enable",
+      "PossibleValues": [
+        {
+          "Token": "1",
+          "VendorName": "Disable"
+        },
+        {
+          "Token": "2",
+          "VendorName": "Enable"
+        }
+      ],
+      "PossibleValuesOrigin": "Interface",
+      "VendorMarksReadOnly": false
+    },
+    {
+      "Id": "VtForDirectIo",
+      "State": "Read",
+      "CurrentToken": "2",
+      "CurrentVendorName": "Enable",
+      "PossibleValues": [
+        {
+          "Token": "1",
+          "VendorName": "Disable"
+        },
+        {
+          "Token": "2",
+          "VendorName": "Enable"
+        }
+      ],
+      "PossibleValuesOrigin": "Interface",
+      "VendorMarksReadOnly": false
+    },
+    {
+      "Id": "IntegratedNic",
+      "State": "Read",
+      "CurrentToken": "3",
+      "CurrentVendorName": "Enable",
+      "PossibleValues": [
+        {
+          "Token": "1",
+          "VendorName": "Disable"
+        },
+        {
+          "Token": "2",
+          "VendorName": "EnabledwithPXE"
+        },
+        {
+          "Token": "3",
+          "VendorName": "Enable"
+        },
+        {
+          "Token": "6",
+          "VendorName": "Enable image server"
+        }
+      ],
+      "PossibleValuesOrigin": "Interface",
+      "VendorMarksReadOnly": false
+    },
+    {
+      "Id": "WakeOnLan",
+      "State": "Read",
+      "CurrentToken": "1",
+      "CurrentVendorName": "Disable",
+      "PossibleValues": [
+        {
+          "Token": "1",
+          "VendorName": "Disable"
+        },
+        {
+          "Token": "4",
+          "VendorName": "LAN"
+        },
+        {
+          "Token": "7",
+          "VendorName": "LAN with PXE Boot"
+        }
+      ],
+      "PossibleValuesOrigin": "Interface",
+      "VendorMarksReadOnly": false
+    },
+    {
+      "Id": "NumLock",
+      "State": "Read",
+      "CurrentToken": "2",
+      "CurrentVendorName": "Enable",
+      "PossibleValues": [
+        {
+          "Token": "1",
+          "VendorName": "Disable"
+        },
+        {
+          "Token": "2",
+          "VendorName": "Enable"
+        }
+      ],
+      "PossibleValuesOrigin": "Interface",
+      "VendorMarksReadOnly": false
+    }
+  ],
+  "Problems": []
+}

@@ -1,0 +1,464 @@
+[
+  {
+    "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:Boot0001",
+    "Kind": "LoadOption",
+    "Summary": "Boot0001: Windows Boot Manager; active, category Boot; HD(1,GPT,6f6e5d1c-8f7a-4d33-9a2b-3c4d5e6f7081,0x800,0x32000)/File(\\EFI\\Microsoft\\Boot\\bootmgfw.efi)",
+    "Fields": [
+      {
+        "Name": "Description",
+        "Value": "Windows Boot Manager"
+      },
+      {
+        "Name": "Attributes",
+        "Value": "0x00000001 (active, category Boot)"
+      },
+      {
+        "Name": "Category",
+        "Value": "Boot"
+      },
+      {
+        "Name": "Device path",
+        "Value": "HD(1,GPT,6f6e5d1c-8f7a-4d33-9a2b-3c4d5e6f7081,0x800,0x32000)/File(\\EFI\\Microsoft\\Boot\\bootmgfw.efi)"
+      },
+      {
+        "Name": "Optional data",
+        "Value": "15 bytes, text \u0022WINDOWS\u0022"
+      }
+    ],
+    "Json": {
+      "Name": "Boot0001",
+      "Index": 1,
+      "Attributes": 1,
+      "Active": true,
+      "ForceReconnect": false,
+      "Hidden": false,
+      "Category": "Boot",
+      "Description": "Windows Boot Manager",
+      "DevicePath": "HD(1,GPT,6f6e5d1c-8f7a-4d33-9a2b-3c4d5e6f7081,0x800,0x32000)/File(\\EFI\\Microsoft\\Boot\\bootmgfw.efi)",
+      "DevicePathNodes": [
+        "HD(1,GPT,6f6e5d1c-8f7a-4d33-9a2b-3c4d5e6f7081,0x800,0x32000)",
+        "File(\\EFI\\Microsoft\\Boot\\bootmgfw.efi)"
+      ],
+      "OptionalDataLength": 15,
+      "OptionalDataText": "WINDOWS",
+      "Error": null
+    },
+    "Error": null
+  },
+  {
+    "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:Boot0002",
+    "Kind": "LoadOption",
+    "Summary": "Boot0002: UEFI: IP4 Intel(R) Ethernet Connection I217-LM; active, category Boot; PciRoot(0x0)/Pci(0x19,0x0)/MAC(00:11:22:33:44:55,1)/IPv4(0.0.0.0)",
+    "Fields": [
+      {
+        "Name": "Description",
+        "Value": "UEFI: IP4 Intel(R) Ethernet Connection I217-LM"
+      },
+      {
+        "Name": "Attributes",
+        "Value": "0x00000001 (active, category Boot)"
+      },
+      {
+        "Name": "Category",
+        "Value": "Boot"
+      },
+      {
+        "Name": "Device path",
+        "Value": "PciRoot(0x0)/Pci(0x19,0x0)/MAC(00:11:22:33:44:55,1)/IPv4(0.0.0.0)"
+      },
+      {
+        "Name": "Optional data",
+        "Value": "0 bytes"
+      }
+    ],
+    "Json": {
+      "Name": "Boot0002",
+      "Index": 2,
+      "Attributes": 1,
+      "Active": true,
+      "ForceReconnect": false,
+      "Hidden": false,
+      "Category": "Boot",
+      "Description": "UEFI: IP4 Intel(R) Ethernet Connection I217-LM",
+      "DevicePath": "PciRoot(0x0)/Pci(0x19,0x0)/MAC(00:11:22:33:44:55,1)/IPv4(0.0.0.0)",
+      "DevicePathNodes": [
+        "PciRoot(0x0)",
+        "Pci(0x19,0x0)",
+        "MAC(00:11:22:33:44:55,1)",
+        "IPv4(0.0.0.0)"
+      ],
+      "OptionalDataLength": 0,
+      "OptionalDataText": null,
+      "Error": null
+    },
+    "Error": null
+  },
+  {
+    "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:Boot0003",
+    "Kind": "LoadOption",
+    "Summary": "Boot0003: UEFI: SanDisk Cruzer; active, category Boot; PciRoot(0x0)/Pci(0x14,0x0)/USB(3,0)",
+    "Fields": [
+      {
+        "Name": "Description",
+        "Value": "UEFI: SanDisk Cruzer"
+      },
+      {
+        "Name": "Attributes",
+        "Value": "0x00000001 (active, category Boot)"
+      },
+      {
+        "Name": "Category",
+        "Value": "Boot"
+      },
+      {
+        "Name": "Device path",
+        "Value": "PciRoot(0x0)/Pci(0x14,0x0)/USB(3,0)"
+      },
+      {
+        "Name": "Optional data",
+        "Value": "0 bytes"
+      }
+    ],
+    "Json": {
+      "Name": "Boot0003",
+      "Index": 3,
+      "Attributes": 1,
+      "Active": true,
+      "ForceReconnect": false,
+      "Hidden": false,
+      "Category": "Boot",
+      "Description": "UEFI: SanDisk Cruzer",
+      "DevicePath": "PciRoot(0x0)/Pci(0x14,0x0)/USB(3,0)",
+      "DevicePathNodes": [
+        "PciRoot(0x0)",
+        "Pci(0x14,0x0)",
+        "USB(3,0)"
+      ],
+      "OptionalDataLength": 0,
+      "OptionalDataText": null,
+      "Error": null
+    },
+    "Error": null
+  },
+  {
+    "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:Boot0004",
+    "Kind": "LoadOption",
+    "Summary": "Boot0004: ST500DM002; active, category Boot; BBS(HD,ST500DM002)",
+    "Fields": [
+      {
+        "Name": "Description",
+        "Value": "ST500DM002"
+      },
+      {
+        "Name": "Attributes",
+        "Value": "0x00000001 (active, category Boot)"
+      },
+      {
+        "Name": "Category",
+        "Value": "Boot"
+      },
+      {
+        "Name": "Device path",
+        "Value": "BBS(HD,ST500DM002)"
+      },
+      {
+        "Name": "Optional data",
+        "Value": "6 bytes"
+      }
+    ],
+    "Json": {
+      "Name": "Boot0004",
+      "Index": 4,
+      "Attributes": 1,
+      "Active": true,
+      "ForceReconnect": false,
+      "Hidden": false,
+      "Category": "Boot",
+      "Description": "ST500DM002",
+      "DevicePath": "BBS(HD,ST500DM002)",
+      "DevicePathNodes": [
+        "BBS(HD,ST500DM002)"
+      ],
+      "OptionalDataLength": 6,
+      "OptionalDataText": null,
+      "Error": null
+    },
+    "Error": null
+  },
+  {
+    "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:BootNext",
+    "Kind": "BootOrder",
+    "Summary": "BootNext: Boot0003 (UEFI: SanDisk Cruzer)",
+    "Fields": [
+      {
+        "Name": "Boot0003",
+        "Value": "UEFI: SanDisk Cruzer"
+      }
+    ],
+    "Json": {
+      "Name": "BootNext",
+      "Entries": [
+        {
+          "Name": "Boot0003",
+          "Index": 3,
+          "Description": "UEFI: SanDisk Cruzer",
+          "Present": true
+        }
+      ],
+      "MissingCount": 0,
+      "Missing": [],
+      "Error": null
+    },
+    "Error": null
+  },
+  {
+    "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:BootOrder",
+    "Kind": "BootOrder",
+    "Summary": "BootOrder: Boot0001 (Windows Boot Manager), Boot0003 (UEFI: SanDisk Cruzer), Boot0002 (UEFI: IP4 Intel(R) Ethernet Connection I217-LM)",
+    "Fields": [
+      {
+        "Name": "Boot0001",
+        "Value": "Windows Boot Manager"
+      },
+      {
+        "Name": "Boot0003",
+        "Value": "UEFI: SanDisk Cruzer"
+      },
+      {
+        "Name": "Boot0002",
+        "Value": "UEFI: IP4 Intel(R) Ethernet Connection I217-LM"
+      }
+    ],
+    "Json": {
+      "Name": "BootOrder",
+      "Entries": [
+        {
+          "Name": "Boot0001",
+          "Index": 1,
+          "Description": "Windows Boot Manager",
+          "Present": true
+        },
+        {
+          "Name": "Boot0003",
+          "Index": 3,
+          "Description": "UEFI: SanDisk Cruzer",
+          "Present": true
+        },
+        {
+          "Name": "Boot0002",
+          "Index": 2,
+          "Description": "UEFI: IP4 Intel(R) Ethernet Connection I217-LM",
+          "Present": true
+        }
+      ],
+      "MissingCount": 0,
+      "Missing": [],
+      "Error": null
+    },
+    "Error": null
+  },
+  {
+    "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:KEK",
+    "Kind": "SecureBootState",
+    "Summary": "KEK: 398 bytes, 2 signature lists, 2 signatures (X509, X509)",
+    "Fields": [
+      {
+        "Name": "Size",
+        "Value": "398 bytes"
+      },
+      {
+        "Name": "Signature lists",
+        "Value": "2"
+      },
+      {
+        "Name": "Signatures",
+        "Value": "2"
+      },
+      {
+        "Name": "Signature types",
+        "Value": "X509, X509"
+      }
+    ],
+    "Json": {
+      "Name": "KEK",
+      "Size": 398,
+      "ListCount": 2,
+      "SignatureTypes": [
+        "X509",
+        "X509"
+      ],
+      "SignatureCount": 2,
+      "Error": null
+    },
+    "Error": null
+  },
+  {
+    "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:PK",
+    "Kind": "SecureBootState",
+    "Summary": "PK: 244 bytes, 1 signature list, 1 signature (X509)",
+    "Fields": [
+      {
+        "Name": "Size",
+        "Value": "244 bytes"
+      },
+      {
+        "Name": "Signature lists",
+        "Value": "1"
+      },
+      {
+        "Name": "Signatures",
+        "Value": "1"
+      },
+      {
+        "Name": "Signature types",
+        "Value": "X509"
+      }
+    ],
+    "Json": {
+      "Name": "PK",
+      "Size": 244,
+      "ListCount": 1,
+      "SignatureTypes": [
+        "X509"
+      ],
+      "SignatureCount": 1,
+      "Error": null
+    },
+    "Error": null
+  },
+  {
+    "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:SecureBoot",
+    "Kind": "SecureBootState",
+    "Summary": "SecureBoot=1: Secure Boot is enabled",
+    "Fields": [
+      {
+        "Name": "Value",
+        "Value": "1"
+      },
+      {
+        "Name": "Meaning",
+        "Value": "Secure Boot is enabled"
+      }
+    ],
+    "Json": {
+      "Name": "SecureBoot",
+      "Value": 1,
+      "Set": true,
+      "Error": null
+    },
+    "Error": null
+  },
+  {
+    "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:SetupMode",
+    "Kind": "SecureBootState",
+    "Summary": "SetupMode=0: user mode: a Platform Key is enrolled",
+    "Fields": [
+      {
+        "Name": "Value",
+        "Value": "0"
+      },
+      {
+        "Name": "Meaning",
+        "Value": "user mode: a Platform Key is enrolled"
+      }
+    ],
+    "Json": {
+      "Name": "SetupMode",
+      "Value": 0,
+      "Set": false,
+      "Error": null
+    },
+    "Error": null
+  },
+  {
+    "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:Timeout",
+    "Kind": "BootOrder",
+    "Summary": "Timeout: 2 seconds (delay before booting the default entry)",
+    "Fields": [
+      {
+        "Name": "Seconds",
+        "Value": "2"
+      },
+      {
+        "Name": "Meaning",
+        "Value": "delay before booting the default entry"
+      }
+    ],
+    "Json": {
+      "Name": "Timeout",
+      "Seconds": 2,
+      "WaitsForever": false,
+      "Error": null
+    },
+    "Error": null
+  },
+  {
+    "Key": "d719b2cb-3d3a-4596-a3bc-dad00e67656f:db",
+    "Kind": "SecureBootState",
+    "Summary": "db: 336 bytes, 2 signature lists, 4 signatures (X509, SHA256)",
+    "Fields": [
+      {
+        "Name": "Size",
+        "Value": "336 bytes"
+      },
+      {
+        "Name": "Signature lists",
+        "Value": "2"
+      },
+      {
+        "Name": "Signatures",
+        "Value": "4"
+      },
+      {
+        "Name": "Signature types",
+        "Value": "X509, SHA256"
+      }
+    ],
+    "Json": {
+      "Name": "db",
+      "Size": 336,
+      "ListCount": 2,
+      "SignatureTypes": [
+        "X509",
+        "SHA256"
+      ],
+      "SignatureCount": 4,
+      "Error": null
+    },
+    "Error": null
+  },
+  {
+    "Key": "d719b2cb-3d3a-4596-a3bc-dad00e67656f:dbx",
+    "Kind": "SecureBootState",
+    "Summary": "dbx: 172 bytes, 1 signature list, 3 signatures (SHA256)",
+    "Fields": [
+      {
+        "Name": "Size",
+        "Value": "172 bytes"
+      },
+      {
+        "Name": "Signature lists",
+        "Value": "1"
+      },
+      {
+        "Name": "Signatures",
+        "Value": "3"
+      },
+      {
+        "Name": "Signature types",
+        "Value": "SHA256"
+      }
+    ],
+    "Json": {
+      "Name": "dbx",
+      "Size": 172,
+      "ListCount": 1,
+      "SignatureTypes": [
+        "SHA256"
+      ],
+      "SignatureCount": 3,
+      "Error": null
+    },
+    "Error": null
+  }
+]

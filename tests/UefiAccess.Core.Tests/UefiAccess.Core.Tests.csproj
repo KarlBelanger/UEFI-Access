@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <RootNamespace>UefiAccess.Core.Tests</RootNamespace>
+    <AssemblyName>UefiAccess.Core.Tests</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\UefiAccess.Core\UefiAccess.Core.csproj" />
+    <ProjectReference Include="..\..\src\UefiAccess.Cli\UefiAccess.Cli.csproj" />
+    <!-- Presentation, never the WPF App: a test host that loads the App needs the Windows Desktop runtime. -->
+    <ProjectReference Include="..\..\src\UefiAccess.Presentation\UefiAccess.Presentation.csproj" />
+  </ItemGroup>
+
+  <!--
+    The UI Automation recorder (src/UefiAccess.UiaTrace, uefiaccess-uia-trace) is a WPF-framework
+    project for its managed UI Automation client, and a test host that loads it needs the Windows
+    Desktop runtime, which this one must not (the tests also run off Windows). So there is no
+    ProjectReference to it: its pure parts, the Recording folder (the base library and Core only, no
+    System.Windows.Automation; UiaTraceRecorderGuardTests keeps it so), are compiled in here.
+  -->
+  <ItemGroup>
+    <Compile Include="..\..\src\UefiAccess.UiaTrace\Recording\*.cs" Link="Recorder\Linked\%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Fixtures\README.md" />
+  </ItemGroup>
+
+</Project>

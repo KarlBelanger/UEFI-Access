@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <RootNamespace>UefiAccess.App</RootNamespace>
+    <AssemblyName>UefiAccess.App</AssemblyName>
+    <Description>Accessible WPF shell for UefiAccess.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UefiAccess.Core\UefiAccess.Core.csproj" />
+    <ProjectReference Include="..\UefiAccess.Presentation\UefiAccess.Presentation.csproj" />
+  </ItemGroup>
+
+</Project>

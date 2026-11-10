@@ -1,0 +1,52 @@
+<Project>
+
+  <!--
+    Shared build properties for every project in the UefiAccess solution.
+    Implementers must not edit project files; all versions and switches live here.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <LangVersion>12</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <PlatformTarget>x64</PlatformTarget>
+    <Version>0.1.0</Version>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <Deterministic>true</Deterministic>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <Product>UefiAccess</Product>
+    <Company>UefiAccess</Company>
+    <Copyright>Copyright (c) 2026 Roger Belanger and Karl Belanger</Copyright>
+  </PropertyGroup>
+
+  <!--
+    Projects under src/ ship XML documentation. With TreatWarningsAsErrors on, a missing
+    doc comment (CS1591) fails the build; write the comment instead of suppressing it.
+  -->
+  <PropertyGroup>
+    <_UefiAccessRelativeProjectDir>$([MSBuild]::MakeRelative('$(MSBuildThisFileDirectory)', '$(MSBuildProjectDirectory)'))</_UefiAccessRelativeProjectDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(_UefiAccessRelativeProjectDir.StartsWith('src'))">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!--
+    UefiAccess.App only (Alpha 1 round 1, findings A1-1, A1-3 and A1-4): a plain ItemsControl gets
+    an automation peer that puts one "data item" element per item in front of the item's own
+    controls, so a screen reader heard every group header, section title and field label once for
+    that element and again for the control inside it (a group header three times). The element can
+    neither be named away nor hidden from XAML, and a container without a peer is given a default
+    one. This documented runtime switch restores the behaviour before .NET Framework 4.8, in which a
+    plain ItemsControl has no peer of its own and the controls inside its item templates are exposed
+    directly. It affects ItemsControl itself only, not ListBox, ListView, ComboBox or any control
+    with a peer of its own. It is read from the application's runtimeconfig.json through
+    AppContext.TryGetSwitch. Explained in src/UefiAccess.App/MainWindow.xaml and asserted by
+    WpfShellAccessibilityTests.
+  -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'UefiAccess.App'">
+    <RuntimeHostConfigurationOption Include="Switch.System.Windows.Controls.ItemsControlDoesNotSupportAutomation" Value="true" />
+  </ItemGroup>
+
+</Project>

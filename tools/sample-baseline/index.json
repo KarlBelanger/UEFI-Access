@@ -1,0 +1,156 @@
+{
+  "ToolVersion": "0.1.0\u002Bsample-fixtures",
+  "TimestampUtc": "2026-09-15T12:00:00Z",
+  "TimestampLocal": "2026-09-15T12:00:00\u002B00:00",
+  "FirmwareType": "Uefi",
+  "PrivilegeState": "Enabled",
+  "Identity": {
+    "Manufacturer": "Sample (fixtures)",
+    "Model": "Sample (fixtures)",
+    "SystemSku": "Sample (fixtures)",
+    "BiosVersion": "Sample (fixtures)",
+    "BiosReleaseDate": "Sample (fixtures)",
+    "ServiceTag": "Sample (fixtures)",
+    "BaseBoard": "Sample (fixtures)",
+    "Cpu": "Sample (fixtures)",
+    "OsCaption": "Sample (fixtures)",
+    "OsVersion": null,
+    "OsBuild": null,
+    "ExpectedModelConfirmed": false,
+    "ExpectedModelNotes": "Sample baseline generated from the UefiAccess test fixtures; not a real machine, so the expected model is not confirmed.",
+    "Errors": []
+  },
+  "VariableCount": 13,
+  "Variables": [
+    {
+      "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:Boot0001",
+      "Name": "Boot0001",
+      "Guid": "8be4df61-93ca-11d2-aa0d-00e098032b8c",
+      "Attributes": 7,
+      "AttributeNames": "NV BS RT",
+      "Size": 179,
+      "Sha256": "d170c1c788586cad8c201d624ac5abf66878a4ed99f749f1912b1ee53907ba15",
+      "File": "vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_Boot0001.bin"
+    },
+    {
+      "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:Boot0002",
+      "Name": "Boot0002",
+      "Guid": "8be4df61-93ca-11d2-aa0d-00e098032b8c",
+      "Attributes": 7,
+      "AttributeNames": "NV BS RT",
+      "Size": 186,
+      "Sha256": "21d9f21611287ac5fe27666db46bbf7720fc23c028d0cbfaf0fb0e3af6a486ae",
+      "File": "vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_Boot0002.bin"
+    },
+    {
+      "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:Boot0003",
+      "Name": "Boot0003",
+      "Guid": "8be4df61-93ca-11d2-aa0d-00e098032b8c",
+      "Attributes": 7,
+      "AttributeNames": "NV BS RT",
+      "Size": 76,
+      "Sha256": "243d1348f1c93aa926635f12fc47314a01415ab78d6615559bd252b8bcc444df",
+      "File": "vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_Boot0003.bin"
+    },
+    {
+      "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:Boot0004",
+      "Name": "Boot0004",
+      "Guid": "8be4df61-93ca-11d2-aa0d-00e098032b8c",
+      "Attributes": 7,
+      "AttributeNames": "NV BS RT",
+      "Size": 57,
+      "Sha256": "8918451cd12c578356ee4bda0446695df763a77d09303cbe16ee716c5e83f44c",
+      "File": "vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_Boot0004.bin"
+    },
+    {
+      "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:BootNext",
+      "Name": "BootNext",
+      "Guid": "8be4df61-93ca-11d2-aa0d-00e098032b8c",
+      "Attributes": 7,
+      "AttributeNames": "NV BS RT",
+      "Size": 2,
+      "Sha256": "9b4fb24edd6d1d8830e272398263cdbf026b97392cc35387b991dc0248a628f9",
+      "File": "vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_BootNext.bin"
+    },
+    {
+      "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:BootOrder",
+      "Name": "BootOrder",
+      "Guid": "8be4df61-93ca-11d2-aa0d-00e098032b8c",
+      "Attributes": 7,
+      "AttributeNames": "NV BS RT",
+      "Size": 6,
+      "Sha256": "53dccebc99ca89fb52b6eb6d88955afd85b498a05a1feb8e17078c449a6f80c9",
+      "File": "vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_BootOrder.bin"
+    },
+    {
+      "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:KEK",
+      "Name": "KEK",
+      "Guid": "8be4df61-93ca-11d2-aa0d-00e098032b8c",
+      "Attributes": 39,
+      "AttributeNames": "NV BS RT TA",
+      "Size": 398,
+      "Sha256": "806bba84d5ef70f7b59c194c8b37b86fba11bbcaa246deb20ac01c9916005f9c",
+      "File": "vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_KEK.bin"
+    },
+    {
+      "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:PK",
+      "Name": "PK",
+      "Guid": "8be4df61-93ca-11d2-aa0d-00e098032b8c",
+      "Attributes": 39,
+      "AttributeNames": "NV BS RT TA",
+      "Size": 244,
+      "Sha256": "4d3312c6c5d6acf7b79e59236a065d98b85442760509edc261800d988dfe518a",
+      "File": "vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_PK.bin"
+    },
+    {
+      "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:SecureBoot",
+      "Name": "SecureBoot",
+      "Guid": "8be4df61-93ca-11d2-aa0d-00e098032b8c",
+      "Attributes": 6,
+      "AttributeNames": "BS RT",
+      "Size": 1,
+      "Sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a",
+      "File": "vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_SecureBoot.bin"
+    },
+    {
+      "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:SetupMode",
+      "Name": "SetupMode",
+      "Guid": "8be4df61-93ca-11d2-aa0d-00e098032b8c",
+      "Attributes": 6,
+      "AttributeNames": "BS RT",
+      "Size": 1,
+      "Sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+      "File": "vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_SetupMode.bin"
+    },
+    {
+      "Key": "8be4df61-93ca-11d2-aa0d-00e098032b8c:Timeout",
+      "Name": "Timeout",
+      "Guid": "8be4df61-93ca-11d2-aa0d-00e098032b8c",
+      "Attributes": 7,
+      "AttributeNames": "NV BS RT",
+      "Size": 2,
+      "Sha256": "99be5efb88ca2013bd8e4eb035fd42d5245468fe9afa70d8ba9c1c419a48c4e8",
+      "File": "vars/8be4df61-93ca-11d2-aa0d-00e098032b8c_Timeout.bin"
+    },
+    {
+      "Key": "d719b2cb-3d3a-4596-a3bc-dad00e67656f:db",
+      "Name": "db",
+      "Guid": "d719b2cb-3d3a-4596-a3bc-dad00e67656f",
+      "Attributes": 39,
+      "AttributeNames": "NV BS RT TA",
+      "Size": 336,
+      "Sha256": "8a8f16338acf3b13500bc1498cae4fb8b3bbc99d9d2a60801543884429252e7f",
+      "File": "vars/d719b2cb-3d3a-4596-a3bc-dad00e67656f_db.bin"
+    },
+    {
+      "Key": "d719b2cb-3d3a-4596-a3bc-dad00e67656f:dbx",
+      "Name": "dbx",
+      "Guid": "d719b2cb-3d3a-4596-a3bc-dad00e67656f",
+      "Attributes": 39,
+      "AttributeNames": "NV BS RT TA",
+      "Size": 172,
+      "Sha256": "49228f9a4a7415246f8fa0deaeb2a92e8253fcaefb5f68e765c396b4c5cd8b85",
+      "File": "vars/d719b2cb-3d3a-4596-a3bc-dad00e67656f_dbx.bin"
+    }
+  ]
+}

@@ -1,0 +1,256 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
+-->
+<Window x:Class="UefiAccess.App.ConfirmChangeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:res="clr-namespace:UefiAccess.Presentation.Resources;assembly=UefiAccess.Presentation"
+        Title="{x:Static res:Strings.ConfirmChangeTitle}"
+        AutomationProperties.Name="{x:Static res:Strings.ConfirmChangeTitle}"
+        Width="760"
+        Height="720"
+        MinWidth="480"
+        MinHeight="360"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        FontSize="{DynamicResource {x:Static SystemFonts.MessageFontSizeKey}}"
+        Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+        Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+        KeyboardNavigation.TabNavigation="Cycle"
+        Loaded="OnLoaded">
+    <!--
+        The confirmation dialog of a change, modal to the main window,
+        opened by the shell inside its dialog guard through IPlatformInteractions.ConfirmChange. It
+        shows the plan the checks made and returns the person's decision; it writes nothing itself.
+        Stock controls only, no control template, no live region, nothing on a timer, colours only
+        through SystemColors and the system message font, as in the main window.
+
+        Tab order (explicit, 1 to 11): What will change (focus on open), Before, After, BitLocker
+        state, Risk, Recovery key, Warnings, Snapshot folder, the check box Suspend BitLocker for one
+        restart (present only when the checks offer the suspend), Confirm change and Cancel. Every
+        box is a read-only TextBox named by its label alone, with the help text "Escape cancels;
+        nothing is written." (the screen reader says the read-only state itself, so the help text
+        does not say it again; A2-6), and its label is shown above it (LabeledBy only in addition to
+        the name). The window's own rule decides the shape of a box (docs/Keyboard-Map.md section 7):
+        a single-line box wraps and is selected whole when keyboard focus arrives from another
+        control, so NVDA reads it whole, and every sentence that must be heard on Tab is such a box,
+        under 200 characters; the three multi-line boxes (Before, After, Warnings) keep their own
+        lines unwrapped, are not selected on arrival, are read line by line from the first, and say
+        on their first line what follows (Before and After count the positions of a boot order,
+        Warnings counts its lines; BootNext's one line is the whole value).
+
+        No default button: Enter in a box does nothing, so a confirmation is always a deliberate
+        Space or Enter on Confirm change, or Alt+F. Cancel is the cancel button, so Escape anywhere
+        in the dialog, and the close button, cancel. Confirm change is named "Confirm change and
+        suspend BitLocker for one restart" while the check box is ticked and "Confirm change"
+        otherwise, so the press that confirms names the suspend; What will change ends with the same
+        sentence while the box is ticked.
+    -->
+    <Window.Resources>
+        <!--
+            Buttons: the main window's ToolbarButtonStyle (spacing, and a border two pixels thick
+            in the text colour while the button has keyboard focus, drawn from the first moment
+            without a key press). A style trigger, no template.
+        -->
+        <Style x:Key="DialogButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="Margin" Value="8,0,0,0" />
+            <Setter Property="MinWidth" Value="96" />
+            <Style.Triggers>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="BorderThickness" Value="2" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
+                    <Setter Property="Padding" Value="11,5" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Every text box: a border three pixels thick while it has keyboard focus, the padding shrinking by the extra border so the text does not move (the main window's rule). -->
+        <Style TargetType="TextBox">
+            <Setter Property="Padding" Value="2" />
+            <Style.Triggers>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="BorderThickness" Value="3" />
+                    <Setter Property="Padding" Value="0" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--
+            A single-line box: read-only, wraps inside its width (nothing is scrolled sideways at a
+            high text size), selected whole when keyboard focus arrives from another control
+            (OnBoxGotKeyboardFocus, VariableDetailViewModel.SelectionOnKeyboardArrival).
+        -->
+        <Style x:Key="SingleLineBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="IsReadOnlyCaretVisible" Value="True" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+            <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+
+        <!--
+            A multi-line box: read-only, its own lines kept unwrapped with a horizontal scroll bar, so
+            Up and Down read one line of the box at a time from the first; nothing is selected on
+            arrival.
+        -->
+        <Style x:Key="MultiLineBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="IsReadOnlyCaretVisible" Value="True" />
+            <Setter Property="AcceptsReturn" Value="True" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+            <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
+            <Setter Property="MinHeight" Value="72" />
+            <Setter Property="MaxHeight" Value="240" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+
+        <!--
+            The suspend check box: collapsed, so no tab stop, unless the checks offer the suspend
+            (BitLocker on, encrypting or unknown, and a reorder or a one-time boot; never the removal
+            of the one-time boot choice); with keyboard focus its box has a border two pixels thick
+            in the text colour, from the first moment. Style triggers, no template.
+        -->
+        <Style x:Key="SuspendCheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Setter Property="Margin" Value="0,4,0,8" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding SuspendOffered, Mode=OneWay}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="BorderThickness" Value="2" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <!-- The boxes scroll when they do not fit; the two buttons have a row of their own below them and are always in view. -->
+    <Grid x:Name="DialogRoot" Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Layout only: not focusable and unnamed, so a screen reader passes over it; keyboard focus scrolls the focused box into view. -->
+        <ScrollViewer x:Name="BoxesScroller"
+                      Grid.Row="0"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Focusable="False">
+            <StackPanel x:Name="BoxesPanel"
+                        Margin="0,0,4,0"
+                        GotKeyboardFocus="OnBoxGotKeyboardFocus"
+                        LostKeyboardFocus="OnBoxLostKeyboardFocus"
+                        PreviewKeyDown="OnBoxesPreviewKeyDown">
+                <TextBlock x:Name="WhatWillChangeLabel" Text="{x:Static res:Strings.WhatWillChangeName}" AutomationProperties.Name="{x:Static res:Strings.WhatWillChangeName}" TextWrapping="Wrap" Margin="0,0,0,2" />
+                <TextBox x:Name="WhatWillChangeBox"
+                         Text="{Binding WhatWillChangeText, Mode=OneWay}"
+                         AutomationProperties.Name="{x:Static res:Strings.WhatWillChangeName}"
+                         AutomationProperties.HelpText="{x:Static res:Strings.ConfirmBoxHelp}"
+                         AutomationProperties.LabeledBy="{Binding ElementName=WhatWillChangeLabel}"
+                         Style="{StaticResource SingleLineBoxStyle}"
+                         TabIndex="1" />
+
+                <TextBlock x:Name="BeforeLabel" Text="{x:Static res:Strings.BeforeName}" AutomationProperties.Name="{x:Static res:Strings.BeforeName}" TextWrapping="Wrap" Margin="0,0,0,2" />
+                <TextBox x:Name="BeforeBox"
+                         Text="{Binding BeforeText, Mode=OneWay}"
+                         AutomationProperties.Name="{x:Static res:Strings.BeforeName}"
+                         AutomationProperties.HelpText="{x:Static res:Strings.ConfirmBoxHelp}"
+                         AutomationProperties.LabeledBy="{Binding ElementName=BeforeLabel}"
+                         Style="{StaticResource MultiLineBoxStyle}"
+                         TabIndex="2" />
+
+                <TextBlock x:Name="AfterLabel" Text="{x:Static res:Strings.AfterName}" AutomationProperties.Name="{x:Static res:Strings.AfterName}" TextWrapping="Wrap" Margin="0,0,0,2" />
+                <TextBox x:Name="AfterBox"
+                         Text="{Binding AfterText, Mode=OneWay}"
+                         AutomationProperties.Name="{x:Static res:Strings.AfterName}"
+                         AutomationProperties.HelpText="{x:Static res:Strings.ConfirmBoxHelp}"
+                         AutomationProperties.LabeledBy="{Binding ElementName=AfterLabel}"
+                         Style="{StaticResource MultiLineBoxStyle}"
+                         TabIndex="3" />
+
+                <TextBlock x:Name="BitLockerStateLabel" Text="{x:Static res:Strings.BitLockerStateName}" AutomationProperties.Name="{x:Static res:Strings.BitLockerStateName}" TextWrapping="Wrap" Margin="0,0,0,2" />
+                <TextBox x:Name="BitLockerStateBox"
+                         Text="{Binding BitLockerStateText, Mode=OneWay}"
+                         AutomationProperties.Name="{x:Static res:Strings.BitLockerStateName}"
+                         AutomationProperties.HelpText="{x:Static res:Strings.ConfirmBoxHelp}"
+                         AutomationProperties.LabeledBy="{Binding ElementName=BitLockerStateLabel}"
+                         Style="{StaticResource SingleLineBoxStyle}"
+                         TabIndex="4" />
+
+                <TextBlock x:Name="RiskLabel" Text="{x:Static res:Strings.RiskName}" AutomationProperties.Name="{x:Static res:Strings.RiskName}" TextWrapping="Wrap" Margin="0,0,0,2" />
+                <TextBox x:Name="RiskBox"
+                         Text="{Binding RiskText, Mode=OneWay}"
+                         AutomationProperties.Name="{x:Static res:Strings.RiskName}"
+                         AutomationProperties.HelpText="{x:Static res:Strings.ConfirmBoxHelp}"
+                         AutomationProperties.LabeledBy="{Binding ElementName=RiskLabel}"
+                         Style="{StaticResource SingleLineBoxStyle}"
+                         TabIndex="5" />
+
+                <TextBlock x:Name="RecoveryKeyLabel" Text="{x:Static res:Strings.RecoveryKeyName}" AutomationProperties.Name="{x:Static res:Strings.RecoveryKeyName}" TextWrapping="Wrap" Margin="0,0,0,2" />
+                <TextBox x:Name="RecoveryKeyBox"
+                         Text="{Binding RecoveryKeyText, Mode=OneWay}"
+                         AutomationProperties.Name="{x:Static res:Strings.RecoveryKeyName}"
+                         AutomationProperties.HelpText="{x:Static res:Strings.ConfirmBoxHelp}"
+                         AutomationProperties.LabeledBy="{Binding ElementName=RecoveryKeyLabel}"
+                         Style="{StaticResource SingleLineBoxStyle}"
+                         TabIndex="6" />
+
+                <TextBlock x:Name="WarningsLabel" Text="{x:Static res:Strings.WarningsName}" AutomationProperties.Name="{x:Static res:Strings.WarningsName}" TextWrapping="Wrap" Margin="0,0,0,2" />
+                <TextBox x:Name="WarningsBox"
+                         Text="{Binding WarningsText, Mode=OneWay}"
+                         AutomationProperties.Name="{x:Static res:Strings.WarningsName}"
+                         AutomationProperties.HelpText="{x:Static res:Strings.ConfirmBoxHelp}"
+                         AutomationProperties.LabeledBy="{Binding ElementName=WarningsLabel}"
+                         Style="{StaticResource MultiLineBoxStyle}"
+                         TabIndex="7" />
+
+                <TextBlock x:Name="SnapshotFolderLabel" Text="{x:Static res:Strings.SnapshotFolderName}" AutomationProperties.Name="{x:Static res:Strings.SnapshotFolderName}" TextWrapping="Wrap" Margin="0,0,0,2" />
+                <TextBox x:Name="SnapshotFolderBox"
+                         Text="{Binding SnapshotFolderText, Mode=OneWay}"
+                         AutomationProperties.Name="{x:Static res:Strings.SnapshotFolderName}"
+                         AutomationProperties.HelpText="{x:Static res:Strings.ConfirmBoxHelp}"
+                         AutomationProperties.LabeledBy="{Binding ElementName=SnapshotFolderLabel}"
+                         Style="{StaticResource SingleLineBoxStyle}"
+                         TabIndex="8" />
+
+                <!-- Ticked by default when offered; ticking or clearing it changes What will change and Confirm change's name, and says nothing (the dialog has no live region). -->
+                <CheckBox x:Name="SuspendCheckBox"
+                          Content="{x:Static res:Strings.SuspendCheckBoxName}"
+                          AutomationProperties.Name="{x:Static res:Strings.SuspendCheckBoxName}"
+                          AutomationProperties.HelpText="{x:Static res:Strings.SuspendCheckBoxHelp}"
+                          IsChecked="{Binding SuspendChosen, Mode=TwoWay}"
+                          Style="{StaticResource SuspendCheckBoxStyle}"
+                          TabIndex="9" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <WrapPanel x:Name="ButtonsPanel" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <!-- Not the default button: only Space or Enter on it, or Alt+F, confirms. Its name follows the check box. -->
+            <Button x:Name="ConfirmChangeButton"
+                    Content="{x:Static res:Strings.ConfirmChangeLabel}"
+                    AutomationProperties.Name="{Binding ConfirmButtonName, Mode=OneWay, FallbackValue={x:Static res:Strings.ConfirmChangeName}}"
+                    AutomationProperties.HelpText="{x:Static res:Strings.ConfirmChangeHelp}"
+                    AutomationProperties.AccessKey="{x:Static res:Strings.ConfirmChangeAccessKey}"
+                    AutomationProperties.AcceleratorKey="{x:Static res:Strings.ConfirmChangeAccessKey}"
+                    Click="OnConfirmChangeClick"
+                    Style="{StaticResource DialogButtonStyle}"
+                    TabIndex="10" />
+            <!-- The cancel button: Escape anywhere in the dialog presses it; nothing is written. It has no access key; its shortcut, Escape, is reported as its AcceleratorKey, as every other button reports its own. -->
+            <Button x:Name="CancelButton"
+                    Content="{x:Static res:Strings.CancelName}"
+                    AutomationProperties.Name="{x:Static res:Strings.CancelName}"
+                    AutomationProperties.HelpText="{x:Static res:Strings.CancelHelp}"
+                    AutomationProperties.AcceleratorKey="{x:Static res:Strings.CancelAcceleratorKey}"
+                    IsCancel="True"
+                    Style="{StaticResource DialogButtonStyle}"
+                    TabIndex="11" />
+        </WrapPanel>
+    </Grid>
+</Window>

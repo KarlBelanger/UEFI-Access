@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    uefiaccess-uia-trace: a console recorder of the UI Automation events another process (a screen
+    reader, for example) receives from the UefiAccess window (Alpha 2 finding A2-7, A1-6 continued).
+    UseWPF only for the managed UI Automation client, UIAutomationClient and UIAutomationTypes,
+    which ship in the Windows Desktop framework; the tool opens no window. No app.manifest: it runs
+    as invoker and refuses to record when it is not elevated, because UefiAccess runs elevated and a
+    client at a lower integrity level receives none of its events. It references Core only. Its
+    pure parts (the Recording folder: no System.Windows.Automation) are compiled into the test
+    project as linked files, because a test host that loads this project needs the Windows Desktop
+    runtime.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>uefiaccess-uia-trace</AssemblyName>
+    <RootNamespace>UefiAccess.UiaTrace</RootNamespace>
+    <Description>Records the UI Automation events the UefiAccess window raises, for the input trace (read-only; sends no input).</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UefiAccess.Core\UefiAccess.Core.csproj" />
+  </ItemGroup>
+
+</Project>
