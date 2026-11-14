@@ -83,7 +83,7 @@ Pro build 26200, lists 76 variables.)
 
 - A header row, then one row per item. Columns are left-aligned and padded with spaces so that the
   widest cell in a column is followed by exactly one space; trailing spaces are trimmed. No
-  box-drawing characters, no colour codes, no truncation of wide values.
+  box-drawing characters, no color codes, no truncation of wide values.
 - Key-value output is a two-column table too: `Field Value` (`info`, `read`, `dell`, `baseline`,
   the `boot` summary), `Variable Value` and `Source Value` (`secureboot`), `Finding Value` (`gate`).
 - Booleans render as `true` and `false`. A value that contains a line break or a tab is flattened
@@ -207,7 +207,7 @@ nothing could be enumerated). When the command line does not parse (exit 2) or a
 (exit 5), no check ran and `firmwareType`, `elevated` and `privilegeState` are all `null`; `command`
 is then the command named on the command line, spelled as that command's own documents spell it
 (`write` for `write` and its `bootorder`, `bootnext`, `restore` and `check`, `write log` for
-`write log`, the same as when a precondition fails), or `uefiaccess` when none was recognised, and
+`write log`, the same as when a precondition fails), or `uefiaccess` when none was recognized, and
 `error` holds the System.CommandLine messages joined with a space:
 
 <!-- schema: ErrorDocument -->
@@ -1587,7 +1587,7 @@ check.
 | Option | Effect |
 |---|---|
 | `--dry-run` | `bootorder`, `bootnext` and `restore` only: run the checks and show the plan; this is also what those three do without `--confirm`. Together with `--confirm` it is a usage error (exit 2) |
-| `--confirm` | after a dry run that passed, confirm exactly this plan with the `--bitlocker` choice and commit it once. Changes are enabled only on the enabled unit: the 2014 OptiPlex 7020 on BIOS A18 whose Windows machine ID hashes to the one value the code holds (the developer's unit; enabling another unit is an M4 decision). The check recognises that unit's Windows installation, not its hardware: a disk clone, a moved drive, a restored system image or a shared deployment image can carry the same machine ID onto another machine, so the unit's disk or system image is not cloned or restored onto another machine while the code holds its value. On every machine whose Windows installation is not a copy of the unit's, the dry run passes and the confirmation is refused, exit 7: at `expectedModel` on another model or BIOS version (`This machine is not the supported OptiPlex 7020 with BIOS A18; nothing is written.`), at `expectedUnit` on another OptiPlex 7020 on BIOS A18 (`This OptiPlex 7020 is not the enabled unit; nothing is written.`) or when the machine ID cannot be read (`The Windows machine ID could not be read, so this unit cannot be recognised as the enabled unit; nothing is written.`) |
+| `--confirm` | after a dry run that passed, confirm exactly this plan with the `--bitlocker` choice and commit it once. Changes are enabled only on the enabled unit: the 2014 OptiPlex 7020 on BIOS A18 whose Windows machine ID hashes to the one value the code holds (the enabled unit). The check recognizes that unit's Windows installation, not its hardware: a disk clone, a moved drive, a restored system image or a shared deployment image can carry the same machine ID onto another machine, so the unit's disk or system image is not cloned or restored onto another machine while the code holds its value. On every machine whose Windows installation is not a copy of the unit's, the dry run passes and the confirmation is refused, exit 7: at `expectedModel` on another model or BIOS version (`This machine is not the supported OptiPlex 7020 with BIOS A18; nothing is written.`), at `expectedUnit` on another OptiPlex 7020 on BIOS A18 (`This OptiPlex 7020 is not the enabled unit; nothing is written.`) or when the machine ID cannot be read (`The Windows machine ID could not be read, so this unit cannot be recognized as the enabled unit; nothing is written.`) |
 | `--bitlocker suspend`, `--bitlocker continue` | the BitLocker choice, needed while BitLocker is on, still encrypting, or in a state that could not be read (treated as on): `suspend` suspends it for one restart after the snapshot and before the write call, `continue` writes with protection on. It is an input of the dry run, so it is accepted without `--confirm`; `suspend` is refused when no suspend is offered (protection off or already suspended, or a clear). Any other value is a usage error (exit 2) |
 | `--allow-no-change` | `bootorder` only: accept an order equal to the current one (the first-write drill). It turns off the unchanged-order refusal and nothing else |
 | `--snapshot-root <dir>` | the snapshot root instead of `%ProgramData%\UefiAccess\snapshots`, in a dry run only: together with `--confirm` it is a usage error (exit 2), so a confirmed change always keeps its snapshot under the default root, where `snapshots` and the application's Restore previous value look for it. The option exists to show that a refused root blocks the change (failure case FC-20). It must lie under `%ProgramData%\UefiAccess` and goes through the same folder check as every folder the tool writes there: a root outside it is refused before anything is created, and a file or a link in its place is refused at the folder check; both block at `snapshotRoot` (exit 7). The root is checked at stage S9, after the BitLocker check (S8), so with BitLocker on the line needs `--bitlocker` to get that far |
@@ -3512,7 +3512,7 @@ From the spec: "`gate` writes `gate.json` containing: machine identity with
 attributes and size match, or absent), BitLocker and Secure Boot policy (d). It does not compute a
 recommendation; a human fills that in."
 
-The document is the CLI's `GateReport` record serialised with the same camelCase settings as every
+The document is the CLI's `GateReport` record serialized with the same camelCase settings as every
 `--json` document (indented, enums as strings, nulls kept). Its top-level properties, in this order:
 
 | Property | Question | Content |

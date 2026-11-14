@@ -322,7 +322,7 @@ public sealed class SnapshotStore
     public const string BeforeNotWrittenFormat = "The before folder of the snapshot could not be written: {0}";
 
     /// <summary>The sentence when snapshot.json cannot be serialised; {0} the reason.</summary>
-    public const string CannotSerialiseFormat = "snapshot.json could not be serialised: {0}";
+    public const string CannotSerialiseFormat = "snapshot.json could not be serialized: {0}";
 
     /// <summary>The sentence when a file of the folder cannot be written; {0} the file, {1} the folder, {2} the reason.</summary>
     public const string CannotWriteFormat = "{0} could not be written in {1}: {2}";

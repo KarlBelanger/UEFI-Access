@@ -82,7 +82,7 @@ public sealed class CctkSettingsProviderTests
         Assert.Null(CctkSettingsProvider.FindValue("NumLock=Enabled", Array.Empty<string>(), out matches));
         Assert.Equal(0, matches);
 
-        // Through the row: no line that names the setting is an answer this version does not recognise.
+        // Through the row: no line that names the setting is an answer this version does not recognize.
         FirmwareSetting row = CctkSettingsProvider.ParseRow(Entry("NumLock"), CctkOutputFixtures.Answer(CctkReadOption.NumLock, CctkOutputFixtures.Empty), out DellInterfaceProblem? problem);
         Assert.Equal(SettingState.NotReported, row.State);
         AssertProblem(problem, DellProblemKind.UnrecognisedOutput, CctkReader.NumLockArgument + ": no line names NumLock or numlock");
@@ -106,7 +106,7 @@ public sealed class CctkSettingsProviderTests
         Assert.Empty(row.PossibleValues);
         Assert.Equal("Num Lock at boot: not reported.", DellSentences.RowSentence(row));
         AssertProblem(problem, DellProblemKind.UnrecognisedOutput, CctkReader.NumLockArgument + ": 2 lines name NumLock or numlock");
-        Assert.Equal("Dell Command Configure answered in a form this version does not recognise.", DellSentences.Cause(problem!));
+        Assert.Equal("Dell Command Configure answered in a form this version does not recognize.", DellSentences.Cause(problem!));
 
         // One line without a value is no value either.
         Assert.Equal(string.Empty, CctkSettingsProvider.FindValue("NumLock=", numLock, out matches));

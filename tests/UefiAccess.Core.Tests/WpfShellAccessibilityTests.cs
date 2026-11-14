@@ -1413,7 +1413,7 @@ public sealed class WpfShellAccessibilityTests
     [Theory]
     [InlineData("src/UefiAccess.App")]
     [InlineData("src/UefiAccess.Presentation")]
-    public void NoTimedBehaviourAndNoCliReference(string folder)
+    public void NoTimedBehaviorAndNoCliReference(string folder)
     {
         const string QuietPeriodTimerFile = "src/UefiAccess.App/Platform/DispatcherDetailScheduler.cs";
         IReadOnlyList<string> files = RepositoryPaths.Enumerate(folder, "*.cs");

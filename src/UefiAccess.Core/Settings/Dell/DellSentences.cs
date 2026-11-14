@@ -65,7 +65,7 @@ public static class DellSentences
     public const string CctkRunFailed = "Dell Command Configure stopped with an error; the log has the details.";
 
     /// <summary>The cause when Dell Command | Configure's answer was not recognised (DF19).</summary>
-    public const string CctkUnrecognisedOutput = "Dell Command Configure answered in a form this version does not recognise.";
+    public const string CctkUnrecognisedOutput = "Dell Command Configure answered in a form this version does not recognize.";
 
     /// <summary>The cause when Dell Command | Configure offers none of the settings on this computer (DF17).</summary>
     public const string CctkOptionsNotSupported = "Dell Command Configure does not offer these settings on this computer.";

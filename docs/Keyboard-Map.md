@@ -21,7 +21,7 @@ Three rules hold everywhere in the window:
    BootNext, and only after the Confirm change dialog; every such change writes a snapshot folder
    first. It can suspend BitLocker for one restart, only when you tick that box in the same dialog.
    Nothing else on the machine is changed. Changes are enabled only on the configured enabled unit
-   (recognised by its Windows machine ID); on every other machine `Confirm change` refuses and nothing
+   (recognized by its Windows machine ID); on every other machine `Confirm change` refuses and nothing
    is written. The Dell settings region only reads; it changes no BIOS setting.
 
 Screen-reader shortcuts (NVDA and Narrator keys) are not part of this map; they belong to the screen
@@ -55,16 +55,16 @@ after every arrow press along its direction, `Left` or `Right` on `Resize list a
 or `Down` on `Resize log panel`; the other two arrows do nothing and say nothing (section 8).
 
 The window asks for 1200 × 800 device-independent pixels and can be made no smaller than 900 × 600;
-each of those is reduced to the screen's work area when the window opens, and the window opens centred
+each of those is reduced to the screen's work area when the window opens, and the window opens centered
 in it, so no part starts under the taskbar at a high display scale. The Status region keeps its full
 height at the bottom; the regions above it share the rest inside an unnamed pane that scrolls only
 when they do not fit at the current text size. The `Dell settings` region is as high as its content,
 and its list scrolls inside, so its rows never push the Status region down.
 
 The control with keyboard focus is marked from the moment the window opens: a button has a two-pixel
-border in the text colour; a text box a three-pixel border; the focused list row a two-pixel outline
-in the Highlight colour; a focused splitter turns the Highlight colour with a HighlightText frame.
-Every colour is a Windows system colour, so a contrast theme supplies all of them.
+border in the text color; a text box a three-pixel border; the focused list row a two-pixel outline
+in the Highlight color; a focused splitter turns the Highlight color with a HighlightText frame.
+Every color is a Windows system color, so a contrast theme supplies all of them.
 
 ## 2. Tab order
 

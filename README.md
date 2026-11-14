@@ -72,12 +72,12 @@ with `uefiaccess write ... --confirm`). No Secure Boot key or state, Boot#### en
 TPM, registry value or boot-configuration entry is ever changed, and nothing is flashed. The Dell
 BIOS settings view shows values and changes none of them.
 
-Changes are enabled on a configured "enabled unit" only, recognised by its Windows installation. The
+Changes are enabled on a configured "enabled unit" only, recognized by its Windows installation. The
 code holds a one-way hash of that installation's Windows machine ID and compares it with the machine
 it runs on; neither the ID nor the hash is printed, logged or recorded. On every other machine the dry
 run, the Change controls and the `Confirm change` dialog work, and the confirmation is refused before
 anything is snapshotted, suspended or written (the check `expectedModel` for another model or BIOS
-version, `expectedUnit` for another unit). **The check recognises the Windows installation, not the
+version, `expectedUnit` for another unit). **The check recognizes the Windows installation, not the
 hardware:** a disk clone, a moved drive, a restored system image or a shared deployment image can carry
 the same machine ID onto another machine, which would then be taken for the unit. Before deploying the
 tool for anyone else, tie the check to the hardware (see

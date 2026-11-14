@@ -126,7 +126,7 @@ pane sections and the hex dump; the baseline folder round trip (`BaselineExporte
 back byte for byte, and malformed folders that yield errors, not exceptions); the namespace
 catalog; and the static XAML checks of `MainWindow.xaml` (a name on every control, help text on
 every input, the six named region groups in F6 order and the headings, unique tab indices,
-exactly one polite live region, no template overrides, no hard-coded colours, no write-implying
+exactly one polite live region, no template overrides, no hard-coded colors, no write-implying
 labels).
 
 Why the test project references `UefiAccess.Presentation` and not `UefiAccess.App`: the M2 prompt
@@ -295,7 +295,7 @@ in it is read until `Read Dell settings` (`Alt+S`) is pressed: it then reads thi
 Dell BIOS settings through Dell Command | Monitor (Dell Command | Configure when that gives no
 answer), shows them in the list `Dell BIOS settings`, and changes nothing. On a machine without the
 Dell software it says so in one sentence (`docs/Dell-Interface-Setup.md`, section 4). A baseline
-folder with a `dell-settings.json` shows the settings it recorded instead, labelled as recorded.
+folder with a `dell-settings.json` shows the settings it recorded instead, labeled as recorded.
 `docs/Keyboard-Map.md` has its keys and focus rules.
 
 To run the application on a machine without the SDK, copy the whole

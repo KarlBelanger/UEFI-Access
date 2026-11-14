@@ -148,7 +148,7 @@ public static class CheckSentences
     public const string NotEnabledUnit = "This OptiPlex 7020 is not the enabled unit; nothing is written.";
 
     /// <summary>S11, check expectedUnit: the Windows machine ID could not be read (or was empty or not a GUID), so the unit is not recognised.</summary>
-    public const string MachineIdNotRead = "The Windows machine ID could not be read, so this unit cannot be recognised as the enabled unit; nothing is written.";
+    public const string MachineIdNotRead = "The Windows machine ID could not be read, so this unit cannot be recognized as the enabled unit; nothing is written.";
 
     /// <summary>S11: the token's hash is not the plan's.</summary>
     public const string TokenDoesNotMatchPlan = "The confirmation does not belong to this change; nothing is written.";

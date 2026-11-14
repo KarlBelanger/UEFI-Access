@@ -327,7 +327,7 @@ failure cases.
 | No drift | the reads of S12 and S14 | `WTT.AnEntryTheRulesRead_ChangedAfterTheDryRun_IsStale`, `CWC.FC22_*` |
 | A snapshot before every write | S12: `SnapshotStore.Create` then `SnapshotStore.Read`, hashes compared | `SnapshotStoreTests`, `SnapshotFolderTests`, `CWC.FC21_*` |
 | Restore through the same pipeline | `RestoreRequest`, resolved at S0 by `SnapshotStore.DeriveRestore` | `WTT.Restore_RunsThroughTheSamePipeline...`, `CWC.FC25_*` |
-| Platform policy | Secure Boot report-only; authenticated variables read-only (rule V10); firmware write protection recognised after the call by `WriteStatusMapping.FromWin32` | `PlatformPolicyTests`, `WritabilityPolicyTests`, `WriteStatusTests` |
+| Platform policy | Secure Boot report-only; authenticated variables read-only (rule V10); firmware write protection recognized after the call by `WriteStatusMapping.FromWin32` | `PlatformPolicyTests`, `WritabilityPolicyTests`, `WriteStatusTests` |
 | BitLocker | `BitLockerPreflight.Assess`; `BitLockerSuspender.SuspendForOneRestart` at S13 only when chosen; no resume; no key material read | `BitLockerPreflightTests`, `BitLockerSuspenderTests`, `CWC.FC15_*`, `CWC.FC16_*` |
 | A structured record of every attempt | `WriteRecord`, `WriteRecordLog`, `record.json`; no service tag, machine ID or key material | `WriteRecordTests`, `WriteRecordLogTests` |
 | A write budget per start | `WriteRecordLog.WriteBudget` (the eighth write since Windows last started is refused) | `WriteRecordLogTests`, `WTT.TheEighthWriteSinceWindowsStarted_IsRefused`, `CWC.FC31_*` |
@@ -345,7 +345,7 @@ ID nor its hash is printed, logged, recorded or documented; only `unitConfirmed`
 reinstall of Windows creates a new machine ID, and every change is then refused until the constant is
 updated in a reviewed commit.
 
-**The check recognises a Windows installation, not hardware.** Machines installed from the same
+**The check recognizes a Windows installation, not hardware.** Machines installed from the same
 deployment image share the `MachineGuid` and therefore pass, as would a disk clone, a moved drive or a
 restored system image. **Before deploying the tool for anyone else, tie the check to the hardware.** A
 next developer replaces the check with one tied to the machine, for example a one-way hash of the Dell
@@ -382,7 +382,7 @@ commit of its own, reviewed line by line.
   `Apply`, `Change`, `Enable`, `Disable`, `Reset` or `Save`; no test on Windows runs the real Dell
   reader.
 - **`WmiCallsAreBoundedTests`**: every WMI round trip under `src/` is bounded.
-- **No timers**: `WpfShellAccessibilityTests.NoTimedBehaviourAndNoCliReference`, and the input trace's
+- **No timers**: `WpfShellAccessibilityTests.NoTimedBehaviorAndNoCliReference`, and the input trace's
   own `InputTraceStaticTests`.
 - **`UiaTraceRecorderGuardTests`**: the recorder sends no input, changes nothing, has no timer, reads
   the event cache only and writes its file only through Core.
@@ -554,7 +554,7 @@ Then, in order:
    to the identity checks, because `PlatformPolicy.IsContractedMachine` and `EnabledUnit` refuse every
    write at `Confirm change` on any other model. Which models, BIOS versions and units the write
    pipeline accepts is a deliberate, reviewed change, with a hardware binding for the unit check (a
-   Windows machine ID recognises an installation, not a machine; section 5.2), the vendor's own
+   Windows machine ID recognizes an installation, not a machine; section 5.2), the vendor's own
    recovery path written and printed first ([Recovery.md](Recovery.md)), and a hardware write-test
    protocol run on that model.
 

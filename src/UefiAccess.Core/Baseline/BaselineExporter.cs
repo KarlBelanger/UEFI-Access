@@ -378,7 +378,7 @@ public sealed class BaselineExporter
         }
         catch (Exception ex)
         {
-            errors.Add($"Cannot serialise {fileName}: {ex.Message}");
+            errors.Add($"Cannot serialize {fileName}: {ex.Message}");
             json = string.Empty;
             return false;
         }

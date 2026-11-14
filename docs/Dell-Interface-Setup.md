@@ -36,7 +36,7 @@ version found).
 From an account with administrator rights, in this order:
 
 1. The Visual C++ 2015-2022 x64 runtime: run `vc_redist.x64.exe` from Microsoft's download page,
-   accept the UAC prompt and the licence, and restart Windows if it asks.
+   accept the UAC prompt and the license, and restart Windows if it asks.
 2. Dell Command | Monitor 10.13.2.56: run its installer from Dell support, accept the UAC prompt,
    take the defaults. It installs `dcstor64` with start type Automatic. Restart Windows if it asks.
 3. Optionally Dell Command | Configure 5.2.2: run its installer, take the defaults, so that
@@ -128,7 +128,7 @@ first problem, and what to do:
 | `Dell Command Configure does not offer these settings on this computer.` | cctk refused the options (exit code 118, 42 or 96) | none | nothing; on another BIOS, check the attribute map's cctk column |
 | `Dell Command Configure did not answer within 15 seconds.` | a cctk run timed out; its process tree was ended, and no cctk runs again until the program is restarted | `Try again; if it fails again, restart Windows and try again.` | close and start the application (or the prompt's next command) again; then restart Windows |
 | `Dell Command Configure stopped with an error; the log has the details.` | cctk ended with another exit code, or could not start; nothing more ran | `Try again; if it fails again, restart Windows and try again.` | read the log line that begins `Dell Command Configure run failed:` |
-| `Dell Command Configure answered in a form this version does not recognise.` | the line `<name>=<value>` was missing or there were two | `Try again; if it fails again, restart Windows and try again.` | record the spelling cctk printed (the log keeps it); a spelling fix is a reviewed change of the attribute map and the list |
+| `Dell Command Configure answered in a form this version does not recognize.` | the line `<name>=<value>` was missing or there were two | `Try again; if it fails again, restart Windows and try again.` | record the spelling cctk printed (the log keeps it); a spelling fix is a reviewed change of the attribute map and the list |
 | `Reading stopped at the time limit of 120 seconds.` | the whole read has a budget of 120 seconds (a few seconds more at worst, while a timed-out run is ended) | `Try again; if it fails again, restart Windows and try again.` | as above |
 | `An unexpected error occurred; the log has the details.` | the reader or a provider failed in a way it does not know | `Try again; if it fails again, restart Windows and try again.` | read the log and report it |
 | `This computer has the built-in Dell BIOS interface of newer models, which this version does not read.` | Dell Command \| Monitor is not installed, and the namespace `root\dcim\sysman\biosattributes` of newer models exists | no install advice | nothing: this version reads that interface on no model (`Dell-Attribute-Map.md`, section 7) |

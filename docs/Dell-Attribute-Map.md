@@ -244,7 +244,7 @@ Activated, Enabled, Enabled, Enabled, Disabled, Enabled.
 Besides the Dell interfaces, the tool decodes one Dell setup variable that Windows can read at
 runtime, `NetworkStackVar` (GUID `d1405d16-7afc-4695-bb12-41459d3695a2`, 6 bytes, attributes
 `NV BS RT`). It is decoded in the variable list and by `uefiaccess read`, like every other variable,
-and it never appears in the Dell settings region. Its namespace is labelled `Network stack
+and it never appears in the Dell settings region. Its namespace is labeled `Network stack
 configuration` in the variable list (the label avoids a word that implies a change, because labels
 are spoken in every row sentence and group header).
 

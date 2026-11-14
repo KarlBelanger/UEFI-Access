@@ -549,7 +549,7 @@ public static class BaselineReader
             return parsed;
         }
 
-        warnings.Add($"{BaselineExporter.IndexFileName} records the firmware type '{text}', which is not recognised; it is shown as {FirmwareType.Unknown}.");
+        warnings.Add($"{BaselineExporter.IndexFileName} records the firmware type '{text}', which is not recognized; it is shown as {FirmwareType.Unknown}.");
         return FirmwareType.Unknown;
     }
 
@@ -560,7 +560,7 @@ public static class BaselineReader
             return parsed;
         }
 
-        warnings.Add($"{BaselineExporter.IndexFileName} records the privilege state '{text}', which is not recognised.");
+        warnings.Add($"{BaselineExporter.IndexFileName} records the privilege state '{text}', which is not recognized.");
         return null;
     }
 

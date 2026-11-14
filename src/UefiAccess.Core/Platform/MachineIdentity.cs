@@ -257,7 +257,7 @@ public sealed class MachineIdentity : IPlatformInspector<MachineIdentityResult>
                 ? "4th-generation Intel (Haswell) part (match)"
                 : generation is int detected
                     ? $"{Ordinal(detected)}-generation Intel Core, not 4th generation (no match)"
-                    : "not a recognised 4th-generation Intel part (no match)";
+                    : "not a recognized 4th-generation Intel part (no match)";
             notes.Append(CultureInfo.InvariantCulture, $"CPU \"{cpuText}\": {cpuDetail}.");
         }
 

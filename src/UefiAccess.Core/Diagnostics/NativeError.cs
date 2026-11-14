@@ -62,7 +62,7 @@ public static class NativeError
     private static readonly IReadOnlyDictionary<uint, (string Name, string Text, int Win32)> NtStatusTable = new Dictionary<uint, (string Name, string Text, int Win32)>
     {
         [NativeConstants.STATUS_SUCCESS] = ("STATUS_SUCCESS", "the operation succeeded", ErrorSuccess),
-        [NativeConstants.STATUS_UNSUCCESSFUL] = ("STATUS_UNSUCCESSFUL", "the requested operation was unsuccessful; the firmware returned an error Windows did not recognise", NativeConstants.ERROR_GEN_FAILURE),
+        [NativeConstants.STATUS_UNSUCCESSFUL] = ("STATUS_UNSUCCESSFUL", "the requested operation was unsuccessful; the firmware returned an error Windows did not recognize", NativeConstants.ERROR_GEN_FAILURE),
         [NativeConstants.STATUS_NOT_IMPLEMENTED] = ("STATUS_NOT_IMPLEMENTED", "not implemented; the machine booted in legacy BIOS mode", NativeConstants.ERROR_INVALID_FUNCTION),
         [NativeConstants.STATUS_INVALID_PARAMETER] = ("STATUS_INVALID_PARAMETER", "invalid parameter", NativeConstants.ERROR_INVALID_PARAMETER),
         [NativeConstants.STATUS_NO_MEMORY] = ("STATUS_NO_MEMORY", "not enough virtual memory or paging file quota is available to complete the operation", NativeConstants.ERROR_NOT_ENOUGH_MEMORY),
