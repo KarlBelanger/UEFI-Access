@@ -175,7 +175,7 @@ bounded; the composition roots give their logger to every Core service they buil
   the window's code is the detail pane's 300 ms quiet period (`DetailRefreshTiming.QuietPeriod`,
   finding A2-7): one `DispatcherTimer` in `DispatcherDetailScheduler.cs`, driven by the tested policy
   of `CoalescingDetailScheduler` and `QuietPeriodPoster`, saying nothing and moving no focus.
-  `WpfShellAccessibilityTests.NoTimedBehaviourAndNoCliReference` forbids every timed form in the App
+  `WpfShellAccessibilityTests.NoTimedBehaviorAndNoCliReference` forbids every timed form in the App
   and Presentation and pins the exception to that file.
 - **Strings.** Every user-visible string of the window is a constant of `Resources/Strings.cs`, read
   by the XAML as `{x:Static res:Strings.Name}`. A sentence the CLI prints too is a constant of Core
@@ -185,7 +185,7 @@ bounded; the composition roots give their logger to every Core service they buil
 - **Wording and stock controls.** No control label holds Apply, Save, Toggle, Edit, Write or Set; no
   read-only box says "read-only" in its help text or name (finding A2-6); a row is one sentence of at
   most 200 characters, name first. A name on every control, help text on every input, no template
-  overrides, system colours and font only, one custom automation peer. A list being read is updated
+  overrides, system colors and font only, one custom automation peer. A list being read is updated
   in place, never rebuilt.
 
 ### 3.4 The write pipeline
@@ -501,7 +501,7 @@ safety model (sections 5 and 8.5).
 (rows built once and updated in place, so a read raises no burst of UI Automation events; no command
 that changes anything); every label, help text and Status sentence in `Strings`; a stock `GroupBox`
 named `<Name>Region` in F6 order in `MainWindow.xaml` with an explicit `TabIndex` on every control (the
-Status box renumbered), access keys, a keyed item style, system colours only; tests in
+Status box renumbered), access keys, a keyed item style, system colors only; tests in
 `WpfShellAccessibilityTests`, `WpfShellLayoutTests`, `WpfShellLowVisionTests`, `ScaffoldSmokeTests` and
 a shell test class; and [Keyboard-Map.md](Keyboard-Map.md) updated.
 
@@ -514,7 +514,7 @@ the store (`WindowsFirmwareVariableStore`); the standard decoders (`BootOrderDec
 pipeline's logic (BootOrder and BootNext under the EFI global GUID with `0x7`, rules V1 to V17, snapshots,
 restore); and the vendor-neutral settings model in `Core/Settings` (`FirmwareSetting`, `SettingValue`,
 `SettingState`, `PossibleValuesOrigin`). Following the specification is not the same as verifying on
-hardware: boot-order persistence, firmware write-protection behaviour and NVRAM reclamation differ by
+hardware: boot-order persistence, firmware write-protection behavior and NVRAM reclamation differ by
 firmware.
 
 **What is Dell-specific** (re-done per vendor):
@@ -547,7 +547,7 @@ Then, in order:
    cctk: one file, a full path under the Program Files known folders, pinned read arguments. Its own
    catalog, mapped by the vendor's names, never codes.
 3. **The window and the command line.** The region, its button, the list, the source line and the
-   Status sentences all say Dell; either generalise them so one region names the vendor of the machine
+   Status sentences all say Dell; either generalize them so one region names the vendor of the machine
    it runs on, or add a sibling region and command (section 8.3). Either way update the accessibility
    tests, [Keyboard-Map.md](Keyboard-Map.md) and [CLI.md](CLI.md).
 4. **Identity and write policy are a decision, not a refactor.** Reading comes first and needs no change

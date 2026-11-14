@@ -66,7 +66,7 @@ screen without firmware access. Full details, log locations and troubleshooting 
 The tool can change exactly two firmware variables under the EFI global GUID, and nothing else:
 BootOrder, put in a new order of its own entries (none added, removed or repeated, the same byte
 count, attributes `NV BS RT`), and BootNext, set to one existing, active boot entry or removed. It can
-also suspend BitLocker for one restart, and only when the person chose that for the change in hand
+also suspend BitLocker for one restart, and only when the person chooses that for the change in hand
 (the box `Suspend BitLocker for one restart` in the `Confirm change` dialog, or `--bitlocker suspend`
 with `uefiaccess write ... --confirm`). No Secure Boot key or state, Boot#### entry, BIOS setting,
 TPM, registry value or boot-configuration entry is ever changed, and nothing is flashed. The Dell

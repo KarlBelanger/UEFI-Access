@@ -40,7 +40,7 @@ version 2.0, the same license as the project (see [LICENSE](LICENSE)).
   table.
 - **Architecture and how to extend the tool** are in [docs/Developer-Guide.md](docs/Developer-Guide.md),
   section 8 (adding a decoder, a Dell field, a command or a window region, supporting another firmware
-  vendor, and adding a new changeable setting). Accessibility behaviour and the keyboard contract are
+  vendor, and adding a new changeable setting). Accessibility behavior and the keyboard contract are
   in [docs/Keyboard-Map.md](docs/Keyboard-Map.md).
 
 ## The safety discipline (read before touching the write path)
