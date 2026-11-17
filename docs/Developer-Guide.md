@@ -1,6 +1,6 @@
-# UefiAccess developer guide
+# UEFI-Access developer guide
 
-This page is the way in for a developer taking UefiAccess over: how to build, test and run it, how
+This page is the way in for a developer taking UEFI-Access over: how to build, test and run it, how
 it is put together, what it reads and can change, how its safety model works, and how to extend it.
 It names the code's own types, methods, tests and files, and links to the detailed documents rather
 than repeating them. Where this page and the code disagree, the code is right.
@@ -11,7 +11,7 @@ the top of [Keyboard-Map.md](Keyboard-Map.md).
 
 ## 1. What the tool is and is not
 
-UefiAccess is a Windows tool (C# 12, .NET 8, x64, WPF) that lets blind and low-vision users read the
+UEFI-Access is a Windows tool (C# 12, .NET 8, x64, WPF) that lets blind and low-vision users read the
 UEFI firmware variables of their machine, and change two of them, through stock user interfaces that
 NVDA and Narrator read. It is validated on one machine, the 2014 Dell OptiPlex 7020 with BIOS A18
 (see the README's supported-hardware note). An installer, code signing, JAWS support and

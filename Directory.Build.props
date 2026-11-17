@@ -16,7 +16,7 @@
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <Deterministic>true</Deterministic>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-    <Product>UefiAccess</Product>
+    <Product>UEFI-Access</Product>
     <Company>UefiAccess</Company>
     <Copyright>Copyright (c) 2026 Roger Belanger and Karl Belanger</Copyright>
   </PropertyGroup>

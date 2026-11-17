@@ -1,7 +1,7 @@
 # Recovery: what to do if the machine does not start normally
 
 This page is for anyone whose Dell OptiPlex 7020 does not start Windows normally after a boot-order or
-one-time-boot change made with UefiAccess. The 2014 OptiPlex 7020 has no firmware recovery menu, so
+one-time-boot change made with UEFI-Access. The 2014 OptiPlex 7020 has no firmware recovery menu, so
 keep this page (and the printout of Dell KB 000124377, "How to Reset Your Dell BIOS or CMOS & Clear
 NVRAM") where you can reach it without the machine.
 
@@ -15,9 +15,9 @@ Go through the parts in order and stop at the first one that fits:
 
 Part D lists what you must never do. If in doubt: stop, leave the machine as it is.
 
-## What UefiAccess changes
+## What UEFI-Access changes
 
-UefiAccess changes only two things, and only after you confirm each change in a dialog:
+UEFI-Access changes only two things, and only after you confirm each change in a dialog:
 
 - the order in which the machine tries its start entries (the boot order, BootOrder);
 - a "start this entry once" choice for the next restart (the one-time boot, BootNext).
@@ -46,7 +46,7 @@ is a label, not the secret).
 
 If the key is refused, re-type each group of six digits. Without this password nobody can unlock drive
 C:. Never read the recovery password aloud, type it anywhere but this screen, copy it or photograph
-it. UefiAccess never reads, shows or keeps it.
+it. UEFI-Access never reads, shows or keeps it.
 
 ## Part B: Windows does not start, or the wrong entry starts
 
@@ -72,7 +72,7 @@ BootOrder and BootNext lines. Then take the first case that fits:
 2. BootNext is still set (a one-time boot the firmware did not use). Remove it: in the application,
    the BootNext row, `Alt+M` (Clear one-time boot), then `Alt+F` (Confirm change); or on the command
    line, `uefiaccess write bootnext --clear` as a dry run, then the same line with `--confirm`.
-3. A UefiAccess reorder put the wrong entry first. Put the order back from the snapshot of that
+3. A UEFI-Access reorder put the wrong entry first. Put the order back from the snapshot of that
    change: the snapshot folder whose name ends in `-reorder` (never a `-restore` or `-bootnext` one).
    Each change names its snapshot when it is made (a folder named with the change's date and time,
    ending `-reorder`).

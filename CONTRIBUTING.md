@@ -1,6 +1,6 @@
-# Contributing to UefiAccess
+# Contributing to UEFI-Access
 
-Thank you for your interest in UefiAccess. This is a firmware tool for blind and low-vision users, so
+Thank you for your interest in UEFI-Access. This is a firmware tool for blind and low-vision users, so
 accessibility and the safety of the write path matter as much as the feature itself. Please read this
 page before opening a pull request.
 

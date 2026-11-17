@@ -1,4 +1,4 @@
-# Building, testing, and running UefiAccess
+# Building, testing, and running UEFI-Access
 
 ## 1. Prerequisites
 
@@ -301,7 +301,7 @@ folder with a `dell-settings.json` shows the settings it recorded instead, label
 To run the application on a machine without the SDK, copy the whole
 `src\UefiAccess.App\bin\Release\net8.0-windows` folder (not the `.exe` alone) to that machine
 and install the ".NET Desktop Runtime 8.0 (x64)" there with its installer. There is no installer
-for UefiAccess itself: installer packaging is out of scope.
+for UEFI-Access itself: installer packaging is out of scope.
 
 ### The input trace and the UI Automation recorder
 
@@ -328,7 +328,7 @@ with the counts of that update (`DetailPaneUpdate`),
 for example `sections 5 kept, 0 added, 0 removed; fields 21 kept, 4 updated, 0 added, 0 removed`;
 the step keeps the name rebuild, so that traces from before and after the change compare.
 
-`uefiaccess-uia-trace.exe`, run from an elevated prompt (UefiAccess runs elevated, and a
+`uefiaccess-uia-trace.exe`, run from an elevated prompt (UEFI-Access runs elevated, and a
 client that is not elevated receives none of its events; without elevation the recorder refuses
 and records nothing), before the application is started:
 
@@ -336,7 +336,7 @@ and records nothing), before the application is started:
 src\UefiAccess.UiaTrace\bin\Release\net8.0-windows\uefiaccess-uia-trace.exe [--out <path>] [--events <list>]
 ```
 
-It waits for the UefiAccess window, subscribes with the managed UI Automation client (an MTA
+It waits for the UEFI-Access window, subscribes with the managed UI Automation client (an MTA
 program) to focus changes, the SelectionItem events, structure changes, live region changes,
 notifications, asynchronous content loaded and changes of `Name`, `Value`, `IsSelected`,
 `HasKeyboardFocus` and `ExpandCollapseState` on the window's subtree, and writes one `UIA-RECV`

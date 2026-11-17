@@ -1,6 +1,6 @@
-# UefiAccess
+# UEFI-Access
 
-UefiAccess is a Windows tool that lets blind and low-vision users read, and safely change, UEFI
+UEFI-Access is a Windows tool that lets blind and low-vision users read, and safely change, UEFI
 firmware settings from inside Windows through stock, screen-reader-friendly interfaces (NVDA and
 Narrator are the reference environments). It reads every UEFI variable Windows can see, decodes the
 boot and Secure Boot variables, shows a short read-only list of Dell BIOS settings, and can change
@@ -11,9 +11,12 @@ It is built as a core library (`UefiAccess.Core`), a command-line tool (`uefiacc
 presentation library (`UefiAccess.Presentation`, no WPF), and a WPF application (`UefiAccess.App.exe`),
 plus a small UI Automation recorder used for accessibility diagnostics.
 
+The project is named UEFI-Access. In code and on disk the program is spelled `UefiAccess`, and its
+command-line tool is `uefiaccess`, because a hyphen is not valid in a .NET namespace.
+
 ## Supported hardware, and a safety warning
 
-UefiAccess is validated and supported only on the 2014 Dell OptiPlex 7020 with BIOS A18. Reading
+UEFI-Access is validated and supported only on the 2014 Dell OptiPlex 7020 with BIOS A18. Reading
 UEFI variables works on any UEFI Windows 11 machine, and the offline baseline view works on any
 Windows PC, but everything else (the Dell BIOS settings view, checked against BIOS A18 only, and all
 firmware writes) is verified on that one model and BIOS version only.
@@ -173,7 +176,7 @@ the write path remains the real control.
 
 ## License
 
-UefiAccess is licensed under the Mozilla Public License, version 2.0. See [LICENSE](LICENSE).
+UEFI-Access is licensed under the Mozilla Public License, version 2.0. See [LICENSE](LICENSE).
 
 Copyright © 2026 Roger Belanger and Karl Belanger.
 

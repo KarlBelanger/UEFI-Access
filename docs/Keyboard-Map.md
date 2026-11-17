@@ -1,6 +1,6 @@
-# UefiAccess keyboard map
+# UEFI-Access keyboard map
 
-This page lists every key the UefiAccess application (`UefiAccess.App.exe`) responds to, every
+This page lists every key the UEFI-Access application (`UefiAccess.App.exe`) responds to, every
 access key, the F6 regions, and the rules that move keyboard focus. It is also for whoever maintains
 the window: the keyboard map, the `Strings` resource class
 (`src/UefiAccess.Presentation/Resources/Strings.cs`) and the window's code-behind must agree, and a
@@ -439,7 +439,7 @@ action leaves focus where it is. The main rules:
   action then moves focus as the load rule says.
 - A change. The checks run while you keep working; their end opens the `Confirm change` dialog, or
   moves focus to the `Status` box when they refuse (`Change blocked: <reason>`). While a change is
-  written, nothing can start another load or change, the window does not close, and UefiAccess refuses
+  written, nothing can start another load or change, the window does not close, and UEFI-Access refuses
   a log off, shut down or restart (`A change is being written; wait for its result.`). The result is
   announced once, with the Loaded sentence of the list read again.
 - A Dell read announces its answer, and moves focus to the selected Dell row (or the Status box on

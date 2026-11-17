@@ -1,7 +1,7 @@
 # uefiaccess command-line reference
 
 `uefiaccess.exe` (project `src/UefiAccess.Cli`, assembly name `uefiaccess`) is the command-line
-harness of UefiAccess. This page lists every command and option: the read commands, the
+harness of UEFI-Access. This page lists every command and option: the read commands, the
 write harness (`write`, `snapshots`) and the Dell settings command (`dell`), the precondition
 checks and their sentences, the exit codes, the
 output conventions, one output example per command (text and `--json`; for `write` one per

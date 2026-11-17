@@ -1,10 +1,10 @@
 # Dell interface setup: what the Dell settings view needs
 
-This page is for whoever sets up or maintains a machine on which UefiAccess shows Dell BIOS
+This page is for whoever sets up or maintains a machine on which UEFI-Access shows Dell BIOS
 settings: what Dell's interface needs, the order to install it in, how to check each part without
 changing anything, and what the tool says when a part is missing.
 
-UefiAccess never installs, starts, or stops anything. It reads, reports what is missing, and says
+UEFI-Access never installs, starts, or stops anything. It reads, reports what is missing, and says
 what to do. A static test (`DellSettingsGuardTests.NoServiceControlOrInstallInSourceOrTools`) keeps
 service control and install commands out of the code and scripts. Everything on this page that
 changes a machine is done by a person, by hand.
