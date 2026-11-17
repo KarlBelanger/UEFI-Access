@@ -1,0 +1,105 @@
+name: Bug report
+description: Report something that does not work as described.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Thanks for taking the time to file a report. Please fill in what you can;
+        the hardware and version fields help a great deal when reproducing an issue.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened
+      description: A clear description of the problem, and what you expected instead.
+      placeholder: When I ... the tool ... but I expected ...
+    validations:
+      required: true
+  - type: dropdown
+    id: interface
+    attributes:
+      label: Which interface
+      description: Where did you see the problem?
+      options:
+        - The application (UefiAccess.App.exe)
+        - The command-line tool (uefiaccess.exe)
+        - Building or testing from source
+        - Not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: operation
+    attributes:
+      label: What were you doing
+      options:
+        - Reading UEFI variables
+        - Viewing the Dell BIOS settings
+        - Opening an offline baseline
+        - Changing the boot order or one-time boot (a firmware write)
+        - Something else
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: >
+        From Help / About in the application, or run `uefiaccess --version`.
+      placeholder: "0.1.0+<commit>"
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Machine model
+      placeholder: Dell OptiPlex 7020
+    validations:
+      required: false
+  - type: input
+    id: bios
+    attributes:
+      label: BIOS version
+      placeholder: A18
+    validations:
+      required: false
+  - type: dropdown
+    id: screenreader
+    attributes:
+      label: Screen reader
+      options:
+        - NVDA
+        - Narrator
+        - Other
+        - None / not relevant
+    validations:
+      required: false
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: What you did, step by step, so someone else can see the same thing.
+      placeholder: |
+        1. Open ...
+        2. Press ...
+        3. ...
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: >
+        Logs are written to C:\ProgramData\UefiAccess\logs. Paste any relevant lines,
+        or attach the file. Please remove anything you would rather not share; the
+        tool does not log machine identifiers, but review before posting.
+      render: text
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and did not find a duplicate.
+          required: true

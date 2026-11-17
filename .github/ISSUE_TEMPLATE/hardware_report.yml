@@ -1,0 +1,67 @@
+name: Hardware test report
+description: Report how reading worked (or did not) on a machine, to help widen tested coverage.
+title: "[Hardware]: "
+labels: ["hardware"]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Firmware writes are gated by design to one validated unit, so this report is
+        about reading only: the UEFI variable list, the offline baseline, and, on a
+        Dell, the read-only BIOS settings view. Reports from other models help show
+        where reading is solid and where it is not. Please do not attempt writes on an
+        unvalidated machine.
+  - type: input
+    id: model
+    attributes:
+      label: Machine model
+      placeholder: Dell OptiPlex 7020, or another make and model
+    validations:
+      required: true
+  - type: input
+    id: bios
+    attributes:
+      label: BIOS / firmware version
+      placeholder: A18
+    validations:
+      required: false
+  - type: dropdown
+    id: readvars
+    attributes:
+      label: Reading UEFI variables
+      options:
+        - Worked
+        - Partly worked
+        - Did not work
+        - Did not try
+    validations:
+      required: true
+  - type: dropdown
+    id: dellview
+    attributes:
+      label: Dell BIOS settings view (Dell machines only)
+      options:
+        - Worked
+        - Partly worked
+        - Did not work
+        - Not a Dell / did not try
+    validations:
+      required: false
+  - type: textarea
+    id: notes
+    attributes:
+      label: What you saw
+      description: >
+        Anything that did not match the documentation: missing values, errors, slow
+        reads, or a screen reader problem specific to this machine.
+      placeholder: Reading the variable list worked, but the Dell settings view reported ...
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: From Help / About, or `uefiaccess --version`.
+      placeholder: "0.1.0+<commit>"
+    validations:
+      required: false

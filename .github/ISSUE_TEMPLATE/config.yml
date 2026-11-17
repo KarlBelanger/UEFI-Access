@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Contributing guide and safety discipline
+    url: https://github.com/KarlBelanger/UEFI-Access/blob/main/CONTRIBUTING.md
+    about: Please read this first, in particular the safety rules around the write path and the guard tests.
+  - name: Recovery steps
+    url: https://github.com/KarlBelanger/UEFI-Access/blob/main/docs/Recovery.md
+    about: If a machine does not start normally after a boot change, start here before filing an issue.

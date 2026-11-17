@@ -1,0 +1,55 @@
+name: Accessibility feedback
+description: Report something that was hard to use, unclear, or wrongly announced with a screen reader.
+title: "[A11y]: "
+labels: ["accessibility"]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Accessibility is the point of this project, so this kind of report is very
+        welcome. Describe what you heard, read, or could not reach, and what would
+        have worked better.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What was hard, unclear, or wrong
+      description: >
+        For a wrong announcement, tell us what the screen reader said and what you
+        expected to hear. For something you could not reach, tell us where you got stuck.
+      placeholder: On the ... screen, pressing ... announced "...", but I expected "..."
+    validations:
+      required: true
+  - type: dropdown
+    id: screenreader
+    attributes:
+      label: Screen reader
+      options:
+        - NVDA
+        - Narrator
+        - Other
+        - No screen reader (keyboard, magnification, colour, or other)
+    validations:
+      required: true
+  - type: input
+    id: srversion
+    attributes:
+      label: Screen reader version
+      placeholder: "NVDA 2024.x"
+    validations:
+      required: false
+  - type: input
+    id: location
+    attributes:
+      label: Where in the tool
+      description: Which screen, control, or region.
+      placeholder: The Change controls, or the Dell settings list, or the Confirm change dialog.
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: From Help / About, or `uefiaccess --version`.
+      placeholder: "0.1.0+<commit>"
+    validations:
+      required: false
