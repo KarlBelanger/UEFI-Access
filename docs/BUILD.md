@@ -309,7 +309,7 @@ The application can write a trace of what happens in its window, and a separate 
 UI Automation events that another process receives from that window. Both are opt-in and write
 nothing but their trace files (and the recorder's start and stop lines in the day's log).
 
-**`UefiAccess.App.exe --trace-input`.** The switch is the one command-line argument the
+`UefiAccess.App.exe --trace-input`. The switch is the one command-line argument the
 application reads (in any case); any other argument changes nothing, and without the switch no
 hook is attached, no file is created and no thread is started. With it the application creates
 `trace-input-<yyyyMMdd-HHmmss>.log` in the folder of its log, after the same folder checks as the
@@ -328,7 +328,7 @@ with the counts of that update (`DetailPaneUpdate`),
 for example `sections 5 kept, 0 added, 0 removed; fields 21 kept, 4 updated, 0 added, 0 removed`;
 the step keeps the name rebuild, so that traces from before and after the change compare.
 
-**`uefiaccess-uia-trace.exe`**, run from an elevated prompt (UefiAccess runs elevated, and a
+`uefiaccess-uia-trace.exe`, run from an elevated prompt (UefiAccess runs elevated, and a
 client that is not elevated receives none of its events; without elevation the recorder refuses
 and records nothing), before the application is started:
 
@@ -395,7 +395,7 @@ value reaches either file beyond what a row's accessible name already holds.
 
 If the special folder cannot be resolved the tool falls back to the temp directory.
 
-**The data root is protected.** The first elevated run creates `C:\ProgramData\UefiAccess` with an
+The data root is protected. The first elevated run creates `C:\ProgramData\UefiAccess` with an
 explicit, protected access list: SYSTEM and Administrators full control, Users read and execute,
 inherited by everything inside and not inheriting ProgramData's "Users may add files" entry. Every
 folder an elevated run creates inside it (`logs`, `baseline`, each run folder, and the folders of
@@ -414,7 +414,7 @@ this way, standard users can read `baseline` and `logs` but not add or delete fi
 a baseline folder into `%ProgramData%\UefiAccess\baseline` from Explorer asks for administrator
 approval, and `Open baseline folder` works from any folder anyway.
 
-**A process without elevation never creates anything under `%ProgramData%`.** When the shared log
+A process without elevation never creates anything under `%ProgramData%`. When the shared log
 folder is missing or cannot be written, the run logs to `%LOCALAPPDATA%\UefiAccess\logs` instead,
 and the first line of that run in the per-user log is a `[WRN]` line:
 `Note: the shared log folder C:\ProgramData\UefiAccess\logs cannot be written, so this run logs to C:\Users\<name>\AppData\Local\UefiAccess\logs.`
@@ -424,7 +424,7 @@ Only when no log file can be kept at all does standard error get one line:
 `Note: neither the shared log folder <shared> nor <per-user folder> can be written, so this run keeps no log file.`
 The command still runs.
 
-**An elevated run that logs to the per-user folder checks it for links.** `%LOCALAPPDATA%`,
+An elevated run that logs to the per-user folder checks it for links. `%LOCALAPPDATA%`,
 `%LOCALAPPDATA%\UefiAccess` and its `logs` folder belong to your account, so before an elevated
 run that falls back to the per-user folder writes its log there, it checks that each is a plain folder and
 that no `uefiaccess-*.log` file in it is a symbolic link. If one is a junction, symbolic link or
@@ -434,7 +434,7 @@ The command still runs. The check is made when the log is opened; a program of t
 could still swap a folder after that moment, which is the boundary between an account's elevated
 and non-elevated programs that Windows does not treat as a security boundary.
 
-**A data root made by an older build or an older test run.** Some earlier builds created
+A data root made by an older build or an older test run. Some earlier builds created
 `C:\ProgramData\UefiAccess` and its `logs` folder on their first run, elevated or not, and a
 `dotnet test` run of them on Windows did the same (the logging smoke test). Such folders carry
 ProgramData's inherited access list, under which any user may add files and folders, and they
@@ -442,7 +442,7 @@ belong to the account whose token created them. That owner decides what the elev
 for the data root and for each folder in it that a run writes through (`logs`, `baseline`); a
 refusal names the folder it refused.
 
-*Created without elevation* (an older build's CLI, or `dotnet test`, from a normal prompt): the
+Created without elevation (an older build's CLI, or `dotnet test`, from a normal prompt): the
 folder is owned by your own account, and the elevated tool refuses it. Its log then goes to the
 administrator's `%LOCALAPPDATA%\UefiAccess\logs`, whose first line reads `Note: this run logs to <per-user folder>, not to the shared log folder C:\ProgramData\UefiAccess\logs: <reason>`,
 and `uefiaccess baseline` into the default folder writes nothing and exits 5 with
@@ -458,7 +458,7 @@ if (Test-Path C:\ProgramData\UefiAccess) { Rename-Item C:\ProgramData\UefiAccess
 (or delete the folder). The next elevated `uefiaccess` command or application start creates it
 again with the protected access list.
 
-*Created while elevated* (an older build's application, which always ran elevated, or its CLI or
+Created while elevated (an older build's application, which always ran elevated, or its CLI or
 `dotnet test` from an administrator prompt): the folder is owned by Administrators, the elevated
 token's default owner, so the tool accepts it and keeps its access list, ProgramData's inherited
 one, as it is. On a machine whose owner policy is "Object creator" such a folder is owned by the

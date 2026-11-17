@@ -9,7 +9,7 @@ The list is the eight items of the agreed scope expressed as ten rows, because T
 Virtualization each map to two Dell attributes. The tool reports the list's status in
 every `uefiaccess dell --json` document as `Approved list of the Dell BIOS settings this tool shows`.
 
-**Checked against BIOS A18 only.** The names, codes and values below come from the Dell Command |
+Checked against BIOS A18 only. The names, codes and values below come from the Dell Command |
 Monitor export of the OptiPlex 7020 (Dell Command | Monitor 10.13.2.56, 72 attributes, BIOS A18),
 from the text of the A18 setup forms (the IFR), and from `syscfg.xml` of Dell Command | Configure
 5.2.2. On another BIOS version the tool still reads and shows the values, and adds the warning
@@ -268,20 +268,20 @@ attribute `UEFI Network Stack` (not one of the ten rows) reads `Enable`, which a
 
 ## 4. Deliberate differences and inferences
 
-- **TPM activation says `Deactivated` and `Activated`.** F2's `TPM State` offers `Deactivate` and
+- TPM activation says `Deactivated` and `Activated`. F2's `TPM State` offers `Deactivate` and
   `Activate`. A row that says `Activate` sounds like a command, so the shown words differ on purpose.
-- **Dell Command | Monitor's `LAN` is shown as `LAN Only`.** Inferred: without WLAN hardware, F2's
+- Dell Command | Monitor's `LAN` is shown as `LAN Only`. Inferred: without WLAN hardware, F2's
   Wake on LAN question offers only `Disabled`, `LAN Only` and `LAN with PXE Boot`, while the setup
   forms' value 4 is `LAN or WLAN`.
-- **`Enable image server` is shown as `Enabled with image server`.** It is probably F2's
+- `Enable image server` is shown as `Enabled with image server`. It is probably F2's
   `Enabled w/Cloud Desktop` (inferred, the setup forms' only fourth option).
-- **`w/` is written out.** F2's `Enabled w/PXE` is shown as `Enabled with PXE`: a screen reader says
+- `w/` is written out. F2's `Enabled w/PXE` is shown as `Enabled with PXE`: a screen reader says
   "w slash".
-- **Secure Boot's `Disable` is inferred.** Dell Command | Monitor lists only `Enable`; a disabled
+- Secure Boot's `Disable` is inferred. Dell Command | Monitor lists only `Enable`; a disabled
   Secure Boot under another name would be shown as Dell's own word and marked as such.
-- **Boxes are shown as values.** Where F2 has a box (TPM Security, Virtualization, VT for Direct
+- Boxes are shown as values. Where F2 has a box (TPM Security, Virtualization, VT for Direct
   I/O, Numlock LED), the tool says `Enabled` for a ticked box and `Disabled` for one not ticked.
-- **The display names split where Dell groups two attributes**, and differ from F2's labels where
+- The display names split where Dell groups two attributes, and differ from F2's labels where
   F2's would not say what the setting is in a list (`Num Lock at boot` for `Numlock LED`).
 
 ## 5. Failure cases
@@ -320,16 +320,16 @@ typically shows DF3 with DF14: the sentence the user hears there is the first re
 
 ## 6. What is not shown, and why
 
-- **The boot order.** The BootOrder decoder shows it in the variable list, from the firmware's own
+- The boot order. The BootOrder decoder shows it in the variable list, from the firmware's own
   variable; the "boot sequence mode" is row 1.
-- **USB boot support.** Its only candidate, Dell Command | Monitor's `USB Emulation`, has a meaning
+- USB boot support. Its only candidate, Dell Command | Monitor's `USB Emulation`, has a meaning
   nobody has verified on this BIOS.
-- **The admin password state.** Not on the agreed list; whether a BIOS password is set is read by
+- The admin password state. Not on the agreed list; whether a BIOS password is set is read by
   the write pipeline's preflight, never by this view.
-- **Fast Boot.** BIOS A18 has no such setting.
-- **The string class's one value.** Dell Command | Monitor's string class holds one constant that
+- Fast Boot. BIOS A18 has no such setting.
+- The string class's one value. Dell Command | Monitor's string class holds one constant that
   its own conversion file writes, a placeholder, not data from the machine. It is never queried.
-- **The other 62 attributes of the 72.** They are read and kept as Dell's own records (name, codes,
+- The other 62 attributes of the 72. They are read and kept as Dell's own records (name, codes,
   Dell's names, Dell's flag) and listed by `uefiaccess dell --all`, in text and JSON. They get no display name, no category and no setup-screen words, because they have not been
   checked against F2; mapping all 72 is out of scope. The integer-type ones among them
   (`Auto On Hour`, `Auto On Minute`, `Intel Rapid Start Timer`, `Primary Video Device Slot`) carry
@@ -417,16 +417,16 @@ interface this build does three things and no more:
 
 A setting is added, removed or renamed in these places, and nowhere else:
 
-1. **One catalog entry** in `src/UefiAccess.Core/Settings/Dell/DellAttributeCatalog.cs`: its id,
+1. One catalog entry in `src/UefiAccess.Core/Settings/Dell/DellAttributeCatalog.cs`: its id,
    display name, category, setup location, Dell Command | Monitor attribute name, and its values in
    the setup screen's words with Dell Command | Monitor's name and Dell Command | Configure's words
    for each. Never a mapping by code.
-2. **Its fixture row**: the Dell Command | Monitor row in
+2. Its fixture row: the Dell Command | Monitor row in
    `tests/UefiAccess.Core.Tests/Fixtures/DcmRowFixtures.cs` (already there for the 72 attributes of
    A18), and a Dell Command | Configure output line in `Fixtures/CctkOutputFixtures.cs` when it is
    read through cctk. The tests that expect the rows in order change with it.
-3. **Its section on this page**, with both tables.
-4. **Its F2 check**: verify its value against the BIOS setup screen on the target machine.
+3. Its section on this page, with both tables.
+4. Its F2 check: verify its value against the BIOS setup screen on the target machine.
 
 A setting that Dell Command | Configure would read with a new option is a guard change of its own: a
 member of `CctkReadOption`, a constant in `CctkReader.cs`, the test's own list of read options in

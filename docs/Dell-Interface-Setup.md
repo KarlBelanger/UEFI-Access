@@ -45,9 +45,9 @@ From an account with administrator rights, in this order:
 
 Not these:
 
-- **Dell Command | Configure 3.3** or the driver package that goes with it. The tool reads both
+- Dell Command | Configure 3.3 or the driver package that goes with it. The tool reads both
   vocabularies of cctk's output, but 5.2.2 is the version this build was written against.
-- **Older Dell Command | Monitor versions** (9.x). The tool was written against 10.13.2.56.
+- Older Dell Command | Monitor versions (9.x). The tool was written against 10.13.2.56.
 - Anything from a script in this repository: none installs anything, by design.
 
 ## 3. Checking each part, read-only

@@ -8,16 +8,16 @@ difference between this page and the build is a bug to report.
 
 Three rules hold everywhere in the window:
 
-1. **Nothing moves focus on a timer.** Focus moves only in direct response to a key you pressed or a
+1. Nothing moves focus on a timer. Focus moves only in direct response to a key you pressed or a
    button you activated, or when an action you started (Refresh, Open baseline folder, the checks or
    the writing of a change, Read Dell settings) finishes. There are no auto-dismissing messages, no
    polling and no delayed focus changes. The application has one timed step of its own, and it is not
    a focus move: after you move in the variable list, the detail pane is rebuilt once the list has
    been quiet for 300 ms (section 9). That rebuild says nothing and moves no focus.
-2. **Every state change is announced once, in the Status box.** The Status box is the only polite
+2. Every state change is announced once, in the Status box. The Status box is the only polite
    live region in the window; the log panel is marked off (it never interrupts) and nothing is
    assertive.
-3. **The window can change exactly two firmware variables**, BootOrder (the order of its entries) and
+3. The window can change exactly two firmware variables, BootOrder (the order of its entries) and
    BootNext, and only after the Confirm change dialog; every such change writes a snapshot folder
    first. It can suspend BitLocker for one restart, only when you tick that box in the same dialog.
    Nothing else on the machine is changed. Changes are enabled only on the configured enabled unit
@@ -237,12 +237,12 @@ named by its label alone, with the help text `Escape returns to the list at the 
 speaks its value, and the help text does not say the box is read-only because the screen reader says
 so from the box's own state. There are two kinds of box:
 
-- **A single-line value** wraps inside its box. The whole value is selected when keyboard focus
+- A single-line value wraps inside its box. The whole value is selected when keyboard focus
   arrives on its box from another control, so a screen reader reads all of it. A value of 512
   characters or more is not selected; the caret goes to its start, the help text is
   `Long value, <n> characters: Down arrow reads it line by line. Escape returns to the list at the same row.`,
   and `Down` reads line by line.
-- **A multi-line value** keeps its own lines, unwrapped, in a fixed-width font with a horizontal
+- A multi-line value keeps its own lines, unwrapped, in a fixed-width font with a horizontal
   scroll bar, read line by line from the first; nothing is selected on arrival. That is the hex dump
   (`Raw data, hex dump`) and any decoded value with a line break.
 
@@ -421,34 +421,34 @@ reading, and only the next `Alt+S` replaces them.
 Focus moves only in direct response to a key or when an action you started finishes; every other
 action leaves focus where it is. The main rules:
 
-- **The window opens** with focus on `Refresh` and Status reading
+- The window opens with focus on `Refresh` and Status reading
   `Ready. Press Refresh (Alt+R) to read the firmware variables, or Open baseline folder (Alt+O) to view a baseline offline.`
   Nothing loads by itself.
-- **A load completes.** On success focus goes to the first row of the list (after a change written and
+- A load completes. On success focus goes to the first row of the list (after a change written and
   verified, to the written variable's row), and Status says the Loaded sentence. On a refusal or
   failure focus goes to the `Status` box, which holds the one-sentence reason. So after `Alt+R` you end
   up either on the data or on the sentence that explains why there is none.
-- **`Enter` or `Space` on a row** moves focus into the detail pane at its first field; **`Escape` in
-  the detail pane** returns to the list at the same row. Selecting a row with the arrows leaves focus
+- `Enter` or `Space` on a row moves focus into the detail pane at its first field; `Escape` in
+  the detail pane returns to the list at the same row. Selecting a row with the arrows leaves focus
   in the list (the row's sentence is what you hear).
-- **`F6` / `Shift+F6`** move to the entry control of the next or previous region (section 4), skipping
+- `F6` / `Shift+F6` move to the entry control of the next or previous region (section 4), skipping
   a region none of whose controls can take focus; only the region landed in is announced.
-- **An action started from its own button** (Refresh or Open baseline folder pressed while focus was
+- An action started from its own button (Refresh or Open baseline folder pressed while focus was
   on that button, or the checks or writing of a change) moves focus to the `Status` box, because the
   button is disabled while the action runs and a disabled control cannot keep focus. The completed
   action then moves focus as the load rule says.
-- **A change.** The checks run while you keep working; their end opens the `Confirm change` dialog, or
+- A change. The checks run while you keep working; their end opens the `Confirm change` dialog, or
   moves focus to the `Status` box when they refuse (`Change blocked: <reason>`). While a change is
   written, nothing can start another load or change, the window does not close, and UefiAccess refuses
   a log off, shut down or restart (`A change is being written; wait for its result.`). The result is
   announced once, with the Loaded sentence of the list read again.
-- **A Dell read** announces its answer, and moves focus to the selected Dell row (or the Status box on
+- A Dell read announces its answer, and moves focus to the selected Dell row (or the Status box on
   a problem with no earlier values), only when you have not moved on and nothing else was started
   since `Alt+S`; otherwise the rows and the state line take the result quietly. `Alt+S` answers while
   a read runs, while the variables load, during a change, or while a baseline folder is shown with a
   one-sentence explanation each time.
 
-**The deferred detail-pane rebuild.** The detail pane is not rebuilt inside the key press that
+The deferred detail-pane rebuild. The detail pane is not rebuilt inside the key press that
 selected a row. The rebuild is held while a key or mouse button is down in the list and, when it comes
 up, waits until the list has been quiet for 300 ms (`DetailRefreshTiming.QuietPeriod`), then runs at
 the window's next idle moment. A key pressed during the wait withdraws the waiting rebuild and starts
@@ -463,11 +463,11 @@ The rebuild says nothing and moves no focus, and it is the one timed step of the
 code (finding A2-7): the no-timer rule has this one exception, pinned by a test to the one file that
 holds it, because merging separate presses needs a wait after the last key.
 
-**`Showing <N> of <M> variables`** is said only when the filter text or either count differs from the
+`Showing <N> of <M> variables` is said only when the filter text or either count differs from the
 list as the window applied it last; a change of `Group by` or `Sort by` alone changes none of them and
 says nothing. `Clear filter` and `Escape` in the filter box say the count once per press.
 
-**The list is rebuilt** whenever its content changes (`Clear filter`, a `Group by`/`Sort by` change,
+The list is rebuilt whenever its content changes (`Clear filter`, a `Group by`/`Sort by` change,
 `Escape` in the filter box, every load). When keyboard focus is on a row or header at that moment, the
 window puts it back as soon as the new list is on screen: on the same row (the selected variable
 survives the rebuild), or on the header of the same group, falling back to the selected row, the first

@@ -19,15 +19,15 @@ localization are out of scope.
 
 What it does:
 
-- **Reads everything Windows can see.** Every UEFI variable with the runtime-access attribute (`RT`;
+- Reads everything Windows can see. Every UEFI variable with the runtime-access attribute (`RT`;
   boot-service-only variables are invisible to any Windows tool), with attributes and bytes. It
   decodes the boot variables, the Secure Boot state, `OsIndications` and Dell's `NetworkStackVar`
   (section 4), reports the platform (firmware type, elevation and privilege, identity, TPM,
   BitLocker, Secure Boot policy, Dell interfaces), writes timestamped baselines of the whole store
   and opens any baseline offline.
-- **Shows ten Dell BIOS settings and changes none of them**, read through Dell Command | Monitor's
+- Shows ten Dell BIOS settings and changes none of them, read through Dell Command | Monitor's
   WMI classes, or Dell Command | Configure's command line when that gives no answer.
-- **Changes exactly two variables, through one pipeline.** BootOrder, put in a new order of its own
+- Changes exactly two variables, through one pipeline. BootOrder, put in a new order of its own
   entries, and BootNext, set to one existing, active boot entry or removed; "Restore previous value"
   puts a snapshot's value back the same way. As a stage of such a confirmed change, and only when
   the person ticks it, it suspends BitLocker for one restart. Changes are enabled only on a machine
@@ -46,14 +46,14 @@ options).
 [BUILD.md](BUILD.md) has the full details, reasons and a troubleshooting table; [CLI.md](CLI.md) has
 every command, option, exit code and JSON document.
 
-- **To build and test:** the .NET 8 SDK x64 (8.0.400 or later). NuGet packages restore during the
+- To build and test: the .NET 8 SDK x64 (8.0.400 or later). NuGet packages restore during the
   build (`System.Management`, `Serilog` with its file and console sinks, `System.CommandLine`;
   `xunit`, `xunit.runner.visualstudio` and `Microsoft.NET.Test.Sdk`); no native DLL, no driver. The
   solution also builds and unit-tests on x64 Linux (`EnableWindowsTargeting`). Build from the
   repository root: `dotnet build UefiAccess.sln -c Release`. It must end with `0 Warning(s)` and
   `0 Error(s)` (`TreatWarningsAsErrors`); projects under `src/` generate XML documentation, so a
   public member without a doc comment (CS1591) fails the build.
-- **To test:** `dotnet test UefiAccess.sln -c Release`. The suite needs no firmware, no Dell software
+- To test: `dotnet test UefiAccess.sln -c Release`. The suite needs no firmware, no Dell software
   and no elevation: it runs on fakes, recorded fixtures and static scans, writes only into temporary
   folders, never constructs the real writer or suspender
   (`WriteCallSiteGuardTests.TestsNeverConstructTheRealWriter`) and never reads Dell Command | Monitor
@@ -62,7 +62,7 @@ every command, option, exit code and JSON document.
   prompt first, for the Windows PowerShell harness tests. On Windows a run skips the tests that only
   mean something off Windows (`[NonWindowsFact]`) and the symbolic-link tests (which need the "Create
   symbolic links" privilege).
-- **To run:** Windows 11 x64 (or Windows 10 22H2) with the **machine-wide** .NET 8 runtime, the
+- To run: Windows 11 x64 (or Windows 10 22H2) with the machine-wide .NET 8 runtime, the
   ".NET Desktop Runtime 8.0 (x64)" for the application. Live reads need UEFI boot and elevation. The
   command-line tool needs an elevated prompt; the application has an `app.manifest` with
   `requireAdministrator`, so the UAC prompt comes at every start. `tools\sample-baseline` (13
@@ -86,7 +86,7 @@ and the application's log panel names it. A tree with uncommitted changes shows 
 | `src/UefiAccess.UiaTrace` | `uefiaccess-uia-trace.exe`, a console recorder of the UI Automation events the window raises (finding A2-7); reads only, sends no input | Core |
 | `tests/UefiAccess.Core.Tests` | Every test (xUnit): unit tests over fakes and fixtures, static guards, and XAML tests; `Presentation/` and `Recorder/` hold the application's and the recorder's | Core, Cli, Presentation; the recorder's `Recording/*.cs` as linked files |
 
-**Why Presentation has no WPF.** A test project that references a WPF application builds anywhere,
+Why Presentation has no WPF. A test project that references a WPF application builds anywhere,
 but its test host then needs the Windows Desktop runtime, which exists only on Windows, so
 `dotnet test` would stop before running anything elsewhere. Everything testable therefore lives in
 `UefiAccess.Presentation`, a plain class library (no `UseWPF`, no `PresentationFramework`,
@@ -120,12 +120,12 @@ bounded; the composition roots give their logger to every Core service they buil
 
 ### 3.2 Reading: from the firmware to the window
 
-1. **Preconditions.** `Platform/FirmwareTypeDetector` (`GetFirmwareType`) and
+1. Preconditions. `Platform/FirmwareTypeDetector` (`GetFirmwareType`) and
    `Privileges/PrivilegeManager`, which enables `SeSystemEnvironmentPrivilege` and reports
    `NotElevated`, `ElevatedPrivilegeAbsent` or `Enabled`. The CLI runs them through
    `Services/Preconditions` in `CommandRunner.Run`; the application runs them in `LiveFirmwareSource`,
    with the CLI's sentences for the UEFI and elevation cases.
-2. **The store.** `Variables/WindowsFirmwareVariableStore` (`IFirmwareVariableStore`) reaches the
+2. The store. `Variables/WindowsFirmwareVariableStore` (`IFirmwareVariableStore`) reaches the
    native layer through the internal seam `INativeFirmwareApi`:
    `NtEnumerateSystemEnvironmentValuesEx` (class 2, parsed by `EnumerationBufferParser`) and
    `GetFirmwareEnvironmentVariableExW` (64 KiB, doubled up to 4 MiB); when the enumeration fails it
@@ -133,56 +133,56 @@ bounded; the composition roots give their logger to every Core service they buil
    native call is logged. A variable is a `FirmwareVariable` keyed `<guid>:<Name>`, a read a
    `VariableSet` (`IVariableLookup`); `InMemoryFirmwareVariableStore` stands in for baselines and
    tests.
-3. **Decoders.** An `IVariableDecoder` says whether it `CanDecode` a variable and returns a
+3. Decoders. An `IVariableDecoder` says whether it `CanDecode` a variable and returns a
    `DecodedVariable` (summary, fields, JSON object, error). `DecoderRegistry.CreateDefault()` is the
    one registry of the CLI, the baseline and the window, so they never disagree (section 4.1).
-4. **Baselines.** `Baseline/BaselineExporter` writes the folder of section 6; `Baseline/BaselineReader`
+4. Baselines. `Baseline/BaselineExporter` writes the folder of section 6; `Baseline/BaselineReader`
    reads one back, refusing links and oversized folders and checking each file's length and SHA-256.
-5. **Platform inspectors** (`Platform/`, each an `IPlatformInspector<T>`): `MachineIdentity` (with the
+5. Platform inspectors (`Platform/`, each an `IPlatformInspector<T>`): `MachineIdentity` (with the
    expected-model check), `TpmInfo`, `BitLockerInspector` (three read-only WMI methods),
    `SecureBootPolicyInspector` (registry, variables and, outside the write pipeline, PowerShell's
    `Confirm-SecureBootUEFI`), `DellInterfaceProbe`. WMI goes through `WmiHelper`, processes through
    `ProcessRunner.Run` (full path, no shell, no window, bounded, process tree killed on timeout).
-6. **Sources** (`Presentation/Services`): `IVariableSource`, implemented by `LiveFirmwareSource`
+6. Sources (`Presentation/Services`): `IVariableSource`, implemented by `LiveFirmwareSource`
    (preconditions, then enumeration and identity side by side, and on every load the unit check of
    section 5.2) and `BaselineFolderSource`; `NamespaceCatalog` gives each vendor GUID its spoken
    label.
-7. **View models** (`Presentation/ViewModels`): `ShellViewModel`, the root and state machine (Idle,
+7. View models (`Presentation/ViewModels`): `ShellViewModel`, the root and state machine (Idle,
    Loading, Loaded, Refused, Failed) owning the commands, announcements and focus requests;
    `VariableListViewModel` (filter, group, sort, one sentence per row, each row's verdict from
    `WritabilityPolicy.Describe`); `VariableDetailViewModel` (updated in place by `DetailPaneReconciler`);
    `LogViewModel`; `ChangeViewModel`; `DellSettingsViewModel`.
-8. **The window.** `App.xaml.cs` calls `ShellViewModel.CreateWindows(...)` with `WpfAnnouncer`,
+8. The window. `App.xaml.cs` calls `ShellViewModel.CreateWindows(...)` with `WpfAnnouncer`,
    `WpfFocusSink`, `WpfPlatformInteractions` and `DispatcherDetailScheduler`; `MainWindow.xaml` binds
    to the shell.
 
 ### 3.3 The accessibility architecture
 
-- **Regions and F6.** Seven regions, stock `GroupBox` controls exposed as named groups, in F6 order:
+- Regions and F6. Seven regions, stock `GroupBox` controls exposed as named groups, in F6 order:
   Toolbar, Filter, List, Detail, Log, Dell settings, Status. WPF on .NET 8 cannot mark UI Automation
   landmarks, so `F6` and `Shift+F6` are the region navigation, and arriving says `<Region> region`
   (arriving in Status says nothing, so the box keeps its message). Every focusable control has an
   explicit `TabIndex`, 1 to 27. Pinned by `WpfShellAccessibilityTests`.
-- **One live region, one announcer.** The Status box is the only polite live region and the log panel
+- One live region, one announcer. The Status box is the only polite live region and the log panel
   is `LiveSetting="Off"`. Every sentence goes through `IAnnouncer.Announce`: `WpfAnnouncer` puts it
   into the Status box and raises one LiveRegionChanged event (none while the box itself has focus; its
   name change is read then); tests use `RecordingAnnouncer`.
-- **Focus.** View models never touch focus: they ask `IFocusSink.RequestFocus(FocusTarget)`
+- Focus. View models never touch focus: they ask `IFocusSink.RequestFocus(FocusTarget)`
   (`WpfFocusSink`; `RecordingFocusSink` in tests). Focus moves only on a key or when an action the
   person started ends, and a Dell answer moves it only while the person has not moved on. Every rule
   is a row of [Keyboard-Map.md](Keyboard-Map.md), section 9.
-- **No timers, one pinned exception.** Nothing announces or moves focus on a timer. The only timer of
+- No timers, one pinned exception. Nothing announces or moves focus on a timer. The only timer of
   the window's code is the detail pane's 300 ms quiet period (`DetailRefreshTiming.QuietPeriod`,
   finding A2-7): one `DispatcherTimer` in `DispatcherDetailScheduler.cs`, driven by the tested policy
   of `CoalescingDetailScheduler` and `QuietPeriodPoster`, saying nothing and moving no focus.
   `WpfShellAccessibilityTests.NoTimedBehaviorAndNoCliReference` forbids every timed form in the App
   and Presentation and pins the exception to that file.
-- **Strings.** Every user-visible string of the window is a constant of `Resources/Strings.cs`, read
+- Strings. Every user-visible string of the window is a constant of `Resources/Strings.cs`, read
   by the XAML as `{x:Static res:Strings.Name}`. A sentence the CLI prints too is a constant of Core
   (`CheckSentences`, `TransactionSentences`, `WritabilitySentences`, `WriteStatusMapping`,
   `BitLockerPreflight`, `DellSentences`) that the window quotes; the precondition sentences are the
   CLI's word for word.
-- **Wording and stock controls.** No control label holds Apply, Save, Toggle, Edit, Write or Set; no
+- Wording and stock controls. No control label holds Apply, Save, Toggle, Edit, Write or Set; no
   read-only box says "read-only" in its help text or name (finding A2-6); a row is one sentence of at
   most 200 characters, name first. A name on every control, help text on every input, no template
   overrides, system colors and font only, one custom automation peer. A list being read is updated
@@ -222,35 +222,35 @@ a read-back the call does not explain.
 
 ### 3.5 The Dell settings provider
 
-- **The model** (`Core/Settings`): `FirmwareSetting`, `SettingValue`, `SettingState` and
+- The model (`Core/Settings`): `FirmwareSetting`, `SettingValue`, `SettingState` and
   `PossibleValuesOrigin`, a vendor-neutral settings model. A Dell read is a `DellSettingsResult` whose
   `DellMachine` holds the manufacturer, model and BIOS version only, never a serial number.
-- **The list** is data: `DellAttributeCatalog.Default`, ten `DellCatalogEntry` rows (section 4.3).
-- **The reader**, `DellSettingsReader` (`IDellSettingsReader.Read(DellReadOptions)`, never throws): the
+- The list is data: `DellAttributeCatalog.Default`, ten `DellCatalogEntry` rows (section 4.3).
+- The reader, `DellSettingsReader` (`IDellSettingsReader.Read(DellReadOptions)`, never throws): the
   machine through `DellMachineReader`; `DcmSettingsProvider`, one pinned `SELECT` of
   `DCIM_BIOSEnumeration` in `root\dcim\sysman` within 60 seconds; when that gives no answer under the
   automatic preference, or with `--source cctk`, `CctkSettingsProvider`, one cctk run per row, one at
   a time, 15 seconds each; detection, never reading, of the native interface of newer models; all
   within one 120-second `DellReadBudget`. Values are mapped by Dell's names, never codes
   (`DellSettingMapper`); every sentence is a constant of `DellSentences`.
-- **cctk** is started only by `CctkReader`: `DellInterfaceProbe.FindCctk` finds it under the two
+- cctk is started only by `CctkReader`: `DellInterfaceProbe.FindCctk` finds it under the two
   Program Files known folders, one of nine pinned read options per run.
-- **Callers**: `uefiaccess dell`; `uefiaccess baseline` (into `dell-settings.json`, Dell Command |
+- Callers: `uefiaccess dell`; `uefiaccess baseline` (into `dell-settings.json`, Dell Command |
   Monitor only); the window's `LiveDellSettingsSource` (on `Alt+S` only) and `BaselineFolderSource`.
-- **`NetworkStackVar`** is not part of the Dell view: a UEFI variable decoded by `NetworkStackDecoder`
+- `NetworkStackVar` is not part of the Dell view: a UEFI variable decoded by `NetworkStackDecoder`
   in the variable list.
 
 ### 3.6 Diagnostics
 
-- **Logging** (`Core/Diagnostics/Logging.cs`): `Logging.Create(component, console)` gives a Serilog
+- Logging (`Core/Diagnostics/Logging.cs`): `Logging.Create(component, console)` gives a Serilog
   logger on the shared daily file at level Debug; `NativeError` turns Win32 and NTSTATUS codes into
   the tools' texts. The CLI mirrors the log to standard error with `--verbose`. The window's log panel
   shows the last 200 lines (`LogPanelSink`).
-- **The input trace**, `UefiAccess.App.exe --trace-input` (`InputTraceSwitch`, `InputTraceFile`,
+- The input trace, `UefiAccess.App.exe --trace-input` (`InputTraceSwitch`, `InputTraceFile`,
   `WpfInputTraceHooks`; Core's `TraceFileWriter`, `TraceLine`, `TraceRedactor`): keys, focus moves,
   selection changes, the detail pane's scheduling and the UI Automation events the window raises,
   written by one background thread with a blocking consumer, no timer.
-- **The recorder**, `uefiaccess-uia-trace.exe` (`UiaRecorder`, `Recording/`): the events another
+- The recorder, `uefiaccess-uia-trace.exe` (`UiaRecorder`, `Recording/`): the events another
   process receives, read from UI Automation's event cache only. Details: [BUILD.md](BUILD.md),
   section 4a.
 
@@ -283,16 +283,16 @@ firmware type, identity, TPM, BitLocker, Secure Boot policy, Dell interfaces ([C
 A restore is one of the three, derived from a snapshot and checked against the firmware as it is now.
 Four places decide:
 
-1. **`Whitelist`** (`Safety/Whitelist.cs`): two `WhitelistEntry` values, BootOrder with
+1. `Whitelist` (`Safety/Whitelist.cs`): two `WhitelistEntry` values, BootOrder with
    `WritableKind.ReorderOnly` and BootNext with `WritableKind.OneShot`, both requiring `0x7`. Every
    other variable is read-only, whatever a caller asks.
-2. **`WritabilityPolicy.Describe(...)`** gives each variable a `WritabilityVerdict` (the `Writability`
+2. `WritabilityPolicy.Describe(...)` gives each variable a `WritabilityVerdict` (the `Writability`
    line, the row's item status, the firmware-setup hint). The Change group shows only what the verdict
    allows; `uefiaccess write check` prints it.
-3. **`PlatformPolicy`**: `IsContractedMachine` (expected model and BIOS `A18`) and `ReadUnit` with
+3. `PlatformPolicy`: `IsContractedMachine` (expected model and BIOS `A18`) and `ReadUnit` with
    `EnabledUnit.Check` are recorded at S2 and refused at S11, so the dry run, the Change controls and
    the dialog work on any UEFI machine and the refusal comes at `Confirm change`.
-4. **`ChangeValidator.Validate`** (S4 to S6) and **`WriteTransaction.BuildWritePlan`** (S15) judge each
+4. `ChangeValidator.Validate` (S4 to S6) and `WriteTransaction.BuildWritePlan` (S15) judge each
    request against the fresh read.
 
 ### 4.3 The ten Dell rows
@@ -345,9 +345,9 @@ ID nor its hash is printed, logged, recorded or documented; only `unitConfirmed`
 reinstall of Windows creates a new machine ID, and every change is then refused until the constant is
 updated in a reviewed commit.
 
-**The check recognizes a Windows installation, not hardware.** Machines installed from the same
+The check recognizes a Windows installation, not hardware. Machines installed from the same
 deployment image share the `MachineGuid` and therefore pass, as would a disk clone, a moved drive or a
-restored system image. **Before deploying the tool for anyone else, tie the check to the hardware.** A
+restored system image. Before deploying the tool for anyone else, tie the check to the hardware. A
 next developer replaces the check with one tied to the machine, for example a one-way hash of the Dell
 service tag (read from `Win32_BIOS`, as `MachineIdentity` already does) beside or instead of the
 machine ID, with the same rules: the value never printed, logged or recorded, only the hash in the
@@ -358,7 +358,7 @@ code, a reviewed commit, and the guard and policy tests updated.
 They run in every `dotnet test` and print `file:line` for each hit. A guard is changed only in a
 commit of its own, reviewed line by line.
 
-- **`NoWriteGuardTests`**: every line of `src/**/*.cs`, `src/**/*.xaml`, `tools/**/*.ps1` and
+- `NoWriteGuardTests`: every line of `src/**/*.cs`, `src/**/*.xaml`, `tools/**/*.ps1` and
   `tools/**/*.psm1`, comments included, against every firmware, Secure Boot, BitLocker, TPM, registry,
   boot-configuration and Dell write path, any WMI method but the three BitLocker readers, PowerShell
   run from a string, and any cctk option but `--version` and `--secureboot` (the full list is the
@@ -366,27 +366,27 @@ commit of its own, reviewed line by line.
   `Kernel32.cs` and `FirmwareVariableWriter.cs` and `DisableKeyProtectors` in `BitLockerSuspender.cs`,
   each on an exact number of lines. It also pins by reflection the constants the scan trusts and the
   nine read options of `CctkReader.cs` by a reviewed digest (`ReviewedCctkReaderCodeSha256`).
-- **`CompiledStringGuardTests`**: the same checks over every string compiled into Core, the CLI and
+- `CompiledStringGuardTests`: the same checks over every string compiled into Core, the CLI and
   Presentation, so a name split in the source is caught.
-- **`WriteCallSiteGuardTests`**: one write import, one call, one caller of `CommitOnce`, no loop, no
+- `WriteCallSiteGuardTests`: one write import, one call, one caller of `CommitOnce`, no loop, no
   public `WritePlan` constructor, no test constructing the real writer or suspender.
-- **`WhitelistGuardTests`**: exactly BootOrder and BootNext with `0x7` and their two kinds; no request
+- `WhitelistGuardTests`: exactly BootOrder and BootNext with `0x7` and their two kinds; no request
   type that carries bytes.
-- **`NativeLocationGuardTests`**: native declarations only under `src/UefiAccess.Core/Native`, no
+- `NativeLocationGuardTests`: native declarations only under `src/UefiAccess.Core/Native`, no
   run-time binding of native code.
-- **`ProcessLaunchGuardTests`**: only `Platform/ProcessRunner.cs` creates a process, and only
+- `ProcessLaunchGuardTests`: only `Platform/ProcessRunner.cs` creates a process, and only
   `DellInterfaceProbe.cs`, `SecureBootPolicyInspector.cs` and `Settings/Dell/CctkReader.cs` call it.
-- **`DellSettingsGuardTests`**: the settings folder names no Dell Command | Monitor service or string
+- `DellSettingsGuardTests`: the settings folder names no Dell Command | Monitor service or string
   class and no WMI method call, runs only its three pinned queries; nothing under `src/` or `tools/`
   controls a service or installs software; no public settings member begins with `Set`, `Write`,
   `Apply`, `Change`, `Enable`, `Disable`, `Reset` or `Save`; no test on Windows runs the real Dell
   reader.
-- **`WmiCallsAreBoundedTests`**: every WMI round trip under `src/` is bounded.
-- **No timers**: `WpfShellAccessibilityTests.NoTimedBehaviorAndNoCliReference`, and the input trace's
+- `WmiCallsAreBoundedTests`: every WMI round trip under `src/` is bounded.
+- No timers: `WpfShellAccessibilityTests.NoTimedBehaviorAndNoCliReference`, and the input trace's
   own `InputTraceStaticTests`.
-- **`UiaTraceRecorderGuardTests`**: the recorder sends no input, changes nothing, has no timer, reads
+- `UiaTraceRecorderGuardTests`: the recorder sends no input, changes nothing, has no timer, reads
   the event cache only and writes its file only through Core.
-- **`CompositionRootLoggingTests`**: every Core service a composition root builds gets the logger.
+- `CompositionRootLoggingTests`: every Core service a composition root builds gets the logger.
 
 ### 5.4 What the guards cannot see
 
@@ -414,19 +414,19 @@ repository, checked on every `dotnet test` by `SampleBaselineGeneratorTests`
 
 ## 7. Known limitations
 
-- **Read-only Dell settings.** The Dell view only reads; it changes no BIOS setting, by design.
-- **Only two variables are writable.** BootOrder and BootNext, and only on an enabled unit.
-- **Validated on one machine.** The 2014 Dell OptiPlex 7020 with BIOS A18. Reads may work on any UEFI
+- Read-only Dell settings. The Dell view only reads; it changes no BIOS setting, by design.
+- Only two variables are writable. BootOrder and BootNext, and only on an enabled unit.
+- Validated on one machine. The 2014 Dell OptiPlex 7020 with BIOS A18. Reads may work on any UEFI
   Windows 11 machine; everything else is unsupported (see the README).
-- **The enabled-unit check is installation-bound, not hardware-bound** (section 5.2): tie it to the
+- The enabled-unit check is installation-bound, not hardware-bound (section 5.2): tie it to the
   hardware before deploying for anyone else.
-- **Unsigned build.** SmartScreen may warn and Smart App Control can block it; signing is out of scope.
-- **No installer, no JAWS, no localization.** All out of scope.
-- **Boot-service-only variables are invisible.** No Windows tool can read them at runtime.
-- **BootOrder may not persist across a restart.** Some firmware or Windows configurations restore the
+- Unsigned build. SmartScreen may warn and Smart App Control can block it; signing is out of scope.
+- No installer, no JAWS, no localization. All out of scope.
+- Boot-service-only variables are invisible. No Windows tool can read them at runtime.
+- BootOrder may not persist across a restart. Some firmware or Windows configurations restore the
   boot order after a restart (for example Windows Boot Manager re-asserting first place); a lost
   reorder is expected, not a fault.
-- **No user-mode NVRAM free-space check.** There is no way to read the firmware's remaining variable
+- No user-mode NVRAM free-space check. There is no way to read the firmware's remaining variable
   storage from Windows, so the write budget (the eighth write since Windows last started is refused)
   and the same-size rule stand in; deleting `write-log.jsonl` resets the budget.
 
@@ -461,31 +461,31 @@ Follow `NetworkStackDecoder`:
 
 [Dell-Attribute-Map.md](Dell-Attribute-Map.md), section 8, is the short form. In order:
 
-1. **The catalog entry**, in `Entries` of `DellAttributeCatalog.cs`: a stable `Id`; a `DisplayName` in
+1. The catalog entry, in `Entries` of `DellAttributeCatalog.cs`: a stable `Id`; a `DisplayName` in
    words a person uses (no `|`, `>` or "read-only", never a bare number, never a word that sounds like
    a command: TPM activation says `Activated`, not F2's `Activate`); the `Category` and `SetupLocation`
    of the BIOS setup screen; Dell Command | Monitor's `DcmAttributeName`; the `Values`, each a
    `DellValueText(Text, DcmName, CctkTokens)`. Map by Dell's names, never by codes. No new WMI query:
    the row is filtered from the one pinned enumeration.
-2. **A cctk read option, only if the fallback must read the row.** Without one the row reads
+2. A cctk read option, only if the fallback must read the row. Without one the row reads
    `not reported`. Adding one is a guard change of its own: a `CctkReadOption` member, a constant in
    `CctkReader.cs` (on a line without the word cctk), its arm in `ArgumentFor`, the entry's `CctkOption`
    and `CctkOutputNames`, the test's list `CctkReadOptionArguments` in `NoWriteGuardTests`, and the
    reviewed digest `ReviewedCctkReaderCodeSha256`. The line scan after the word cctk still allows only
    `--version` and `--secureboot`; never pass a value, `-i`, `--infile`, `-o`, `--outfile` or the
    boot-order option.
-3. **The fixtures**: `Fixtures/DcmRowFixtures.cs` holds the 72 A18 attributes; add the row's expected
+3. The fixtures: `Fixtures/DcmRowFixtures.cs` holds the 72 A18 attributes; add the row's expected
    text, and a cctk line to `CctkOutputFixtures.cs` when read through cctk.
-4. **The tests that change with the list** (`DellAttributeCatalogTests`, `DcmSettingsProviderTests`,
+4. The tests that change with the list (`DellAttributeCatalogTests`, `DcmSettingsProviderTests`,
    `CctkSettingsProviderTests`, `DellSentencesTests`, the view-model and CLI Dell tests), then
    regenerate the sample baseline (section 2).
-5. **The attribute map**: a section with its two tables, and the attribute removed from the "not shown"
+5. The attribute map: a section with its two tables, and the attribute removed from the "not shown"
    list.
-6. **F2 verification**: check the row's value against the BIOS setup screen on the target machine.
+6. F2 verification: check the row's value against the BIOS setup screen on the target machine.
 
 ### 8.3 A new CLI command, or a window region
 
-**A command** follows `Commands/DellCommand.cs`: an `internal static class` in
+A command follows `Commands/DellCommand.cs`: an `internal static class` in
 `src/UefiAccess.Cli/Commands/` whose `Create(...)` runs the body through `CommandRunner.Run(...)`
 (which brings the preconditions, the one JSON document and the exit codes of [CLI.md](CLI.md) section 2
 with it); its document an `internal sealed record <Name>Document` starting with `Command` and `Ok`;
@@ -496,7 +496,7 @@ service joins `CliPlatform` and `CliServices`. Tests: a class like `CliDellComma
 example in `docs/CLI.md`. A command that changes anything is not a new command but a change of the
 safety model (sections 5 and 8.5).
 
-**A region** follows the `Dell settings` region: a `Region` member in its F6 position
+A region follows the `Dell settings` region: a `Region` member in its F6 position
 (`RegionOrder.Order`/`Name`, a `FocusTarget`, a `WindowFit` rule if it needs a height); a view model
 (rows built once and updated in place, so a read raises no burst of UI Automation events; no command
 that changes anything); every label, help text and Status sentence in `Strings`; a stock `GroupBox`
@@ -507,7 +507,7 @@ a shell test class; and [Keyboard-Map.md](Keyboard-Map.md) updated.
 
 ### 8.4 Supporting another firmware vendor (HP, Lenovo, and others)
 
-**What already holds on any UEFI machine** (it follows the UEFI specification and Windows, not Dell):
+What already holds on any UEFI machine (it follows the UEFI specification and Windows, not Dell):
 the store (`WindowsFirmwareVariableStore`); the standard decoders (`BootOrderDecoder`,
 `LoadOptionDecoder`, `SecureBootStateDecoder`, `OsIndicationsDecoder`); baselines; the inspectors
 `FirmwareTypeDetector`, `TpmInfo`, `BitLockerInspector`, `SecureBootPolicyInspector`; the write
@@ -517,7 +517,7 @@ restore); and the vendor-neutral settings model in `Core/Settings` (`FirmwareSet
 hardware: boot-order persistence, firmware write-protection behavior and NVRAM reclamation differ by
 firmware.
 
-**What is Dell-specific** (re-done per vendor):
+What is Dell-specific (re-done per vendor):
 
 | Part | Code and files |
 |---|---|
@@ -530,12 +530,12 @@ firmware.
 
 Then, in order:
 
-1. **A feasibility gate on the target model**, read-only, with someone at the machine: UEFI boot and
+1. A feasibility gate on the target model, read-only, with someone at the machine: UEFI boot and
    Secure Boot (`uefiaccess info`, `secureboot`); the variables readable (`list`, a baseline); the BIOS
    version; which vendor interface answers; BitLocker and the TPM; that BIOS version's setup forms
    (`gate --ifr-varstores` takes any vendor's `Name;GUID;Size` list). If no vendor interface answers,
    that model gets no settings view.
-2. **A read-only settings provider**, in a folder of its own beside `Settings/Dell` (for example
+2. A read-only settings provider, in a folder of its own beside `Settings/Dell` (for example
    `Settings/Hp`), built like Dell's and mapping into `FirmwareSetting`. The guard changes come first,
    reviewed on their own: `DellSettingsGuardTests` scans every file under `src/UefiAccess.Core/Settings`,
    so a new query must be added to `PinnedQueries`, the vendor's write classes and methods to
@@ -546,11 +546,11 @@ Then, in order:
    budget; every failure a problem of the result, nothing thrown. A vendor tool only as a fallback, as
    cctk: one file, a full path under the Program Files known folders, pinned read arguments. Its own
    catalog, mapped by the vendor's names, never codes.
-3. **The window and the command line.** The region, its button, the list, the source line and the
+3. The window and the command line. The region, its button, the list, the source line and the
    Status sentences all say Dell; either generalize them so one region names the vendor of the machine
    it runs on, or add a sibling region and command (section 8.3). Either way update the accessibility
    tests, [Keyboard-Map.md](Keyboard-Map.md) and [CLI.md](CLI.md).
-4. **Identity and write policy are a decision, not a refactor.** Reading comes first and needs no change
+4. Identity and write policy are a decision, not a refactor. Reading comes first and needs no change
    to the identity checks, because `PlatformPolicy.IsContractedMachine` and `EnabledUnit` refuse every
    write at `Confirm change` on any other model. Which models, BIOS versions and units the write
    pipeline accepts is a deliberate, reviewed change, with a hardware binding for the unit check (a
@@ -558,18 +558,18 @@ Then, in order:
    recovery path written and printed first ([Recovery.md](Recovery.md)), and a hardware write-test
    protocol run on that model.
 
-**Starting points (unverified here)**, from the vendors' published management interfaces. Confirm each
+Starting points (unverified here), from the vendors' published management interfaces. Confirm each
 on the target model, read-only and by hand first
 (`Get-CimInstance -Namespace <namespace> -ClassName <class>`, never `Invoke-CimMethod`):
 
-- **HP business PCs**: the WMI namespace `root\HP\InstrumentedBIOS`, classes `HP_BIOSEnumeration`,
+- HP business PCs: the WMI namespace `root\HP\InstrumentedBIOS`, classes `HP_BIOSEnumeration`,
   `HP_BIOSString`, `HP_BIOSInteger`, `HP_BIOSOrderedList`, `HP_BIOSPassword`. Settings are changed
   through `HP_BIOSSettingInterface`, which a read-only provider never calls and the guards ban by name.
-- **Lenovo (ThinkPad, ThinkCentre, ThinkStation)**: `Lenovo_BiosSetting` in `root\WMI`, whose
+- Lenovo (ThinkPad, ThinkCentre, ThinkStation): `Lenovo_BiosSetting` in `root\WMI`, whose
   `CurrentSetting` reads "Name,Value". Changes go through `Lenovo_SetBiosSetting` /
   `Lenovo_SaveBiosSettings`, never called by a read-only provider. `root\WMI` exists on every Windows
   machine, so there an absent class, not an absent namespace, says the interface is missing.
-- **Newer Dell models**: `root\dcim\sysman\biosattributes`, which `DellInterfaceProbe` detects and
+- Newer Dell models: `root\dcim\sysman\biosattributes`, which `DellInterfaceProbe` detects and
   never reads; `IDellSettingsProvider` leaves a seam for a third provider there.
 
 ### 8.5 A new changeable (writable) setting
@@ -579,31 +579,31 @@ shape of the write pipeline's rules (the operation, the bytes, the rules, what c
 failure modes), and prove it on hardware with snapshots, a restore and someone at the machine before it
 is trusted. In order:
 
-1. **The guard tests, in a commit of their own, reviewed first.** `WhitelistGuardTests` and
+1. The guard tests, in a commit of their own, reviewed first. `WhitelistGuardTests` and
    `WhitelistTests` (two entries today, BootOrder and BootNext under the EFI global GUID with `0x7`)
    fail on purpose until changed; `WriteCallSiteGuardTests` stays as it is (a new setting reuses the one
    `CommitOnce` call and adds no call site, import or process).
-2. **The whitelist** (`Safety/Whitelist.cs`): a `WhitelistEntry` in `Entries`, and a `WritableKind`
+2. The whitelist (`Safety/Whitelist.cs`): a `WhitelistEntry` in `Entries`, and a `WritableKind`
    member if the operation is new. Attributes other than `0x7` also change `WritePlan.RequiredAttributes`,
    the write path itself.
-3. **The request** (`Safety/ChangeRequest.cs`): a sealed record carrying numbers or typed values, never
+3. The request (`Safety/ChangeRequest.cs`): a sealed record carrying numbers or typed values, never
    bytes; `SnapshotStore.DeriveRestore` must resolve a snapshot into it.
-4. **The validation** (`Safety/ChangeValidator.cs`): the target in `Validate`'s switch, the rules in
+4. The validation (`Safety/ChangeValidator.cs`): the target in `Validate`'s switch, the rules in
    `Run.Execute`, the after-image encoded by the pipeline (as `BootListCodec` does), identifiers in
    `CheckNames` and reasons in `CheckSentences`.
-5. **The verdicts** (`Safety/WritabilityPolicy.cs`): a `Writability` member, its sentence and item
+5. The verdicts (`Safety/WritabilityPolicy.cs`): a `Writability` member, its sentence and item
    status, the branch in `Describe`; no sentence begins with "Read-only".
-6. **The transaction** (`Safety/WriteTransaction.cs`): the direct reads, the BitLocker read,
+6. The transaction (`Safety/WriteTransaction.cs`): the direct reads, the BitLocker read,
    `BuildWritePlan` (kind, attributes, size rule), `Classify`, the outcome sentences, the snapshot
    folder word.
-7. **The record and snapshot** (`WriteRecord.cs`, `SnapshotStore.cs`): the operation in the record; a
+7. The record and snapshot (`WriteRecord.cs`, `SnapshotStore.cs`): the operation in the record; a
    changed record field needs a new schema version.
-8. **The command line and Presentation**: a `write` subcommand like `CreateBootOrder`; a `ChangeAction`
+8. The command line and Presentation: a `write` subcommand like `CreateBootOrder`; a `ChangeAction`
    and dialog texts (each single-line box under 200 characters, no write-implying label); the App
    control in the Change group with an explicit `TabIndex` and a unique access key.
-9. **The failure cases**: a unit test per refusal (the writer never called), a rig line in
+9. The failure cases: a unit test per refusal (the writer never called), a rig line in
    `tools/write-tests/Run-FailureCases.ps1` refused before any call (never `--confirm`).
-10. **The documents**: the Safety README, the README's "Write guarantee", [CLI.md](CLI.md),
+10. The documents: the Safety README, the README's "Write guarantee", [CLI.md](CLI.md),
     [Keyboard-Map.md](Keyboard-Map.md), and, if the setting can affect a start, [Recovery.md](Recovery.md).
-11. **The hardware test**: on the target machine, with BitLocker handled as the recovery procedure says,
+11. The hardware test: on the target machine, with BitLocker handled as the recovery procedure says,
     write / restart / check / restore. Until then the setting is unverified on hardware.

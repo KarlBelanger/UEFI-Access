@@ -13,23 +13,23 @@ Go through the parts in order and stop at the first one that fits:
 | Windows does not start, or something other than the usual Windows starts | Part B |
 | No Dell logo at all: the machine does not start its own checks (no POST) | Part C |
 
-Part D lists what you must never do. **If in doubt: stop, leave the machine as it is.**
+Part D lists what you must never do. If in doubt: stop, leave the machine as it is.
 
 ## What UefiAccess changes
 
 UefiAccess changes only two things, and only after you confirm each change in a dialog:
 
-- the order in which the machine tries its start entries (the **boot order**, BootOrder);
-- a "start this entry once" choice for the next restart (the **one-time boot**, BootNext).
+- the order in which the machine tries its start entries (the boot order, BootOrder);
+- a "start this entry once" choice for the next restart (the one-time boot, BootNext).
 
 It never changes a BIOS setting, Secure Boot, a password or a BitLocker key. When you tick the box for
 it, it suspends BitLocker for one restart. Before every change it saves a copy of the old values (a
-**snapshot**), so the old boot order can be put back.
+snapshot), so the old boot order can be put back.
 
-Words used here: **F12 menu** is the one-time boot menu (press F12 at the Dell logo); **F2 Setup** is
-the machine's own settings screens (press F2 at the Dell logo); **Windows Boot Manager** is the start
-entry that starts Windows; **POST** is the machine's own checks before the Dell logo; **recovery
-password** is the 48-digit number that unlocks drive C: when BitLocker's check fails.
+Words used here: F12 menu is the one-time boot menu (press F12 at the Dell logo); F2 Setup is
+the machine's own settings screens (press F2 at the Dell logo); Windows Boot Manager is the start
+entry that starts Windows; POST is the machine's own checks before the Dell logo; recovery
+password is the 48-digit number that unlocks drive C: when BitLocker's check fails.
 
 ## Part A: a BitLocker recovery screen
 
@@ -45,8 +45,8 @@ is a label, not the secret).
 4. Wait for Windows to start.
 
 If the key is refused, re-type each group of six digits. Without this password nobody can unlock drive
-C:. **Never read the recovery password aloud, type it anywhere but this screen, copy it or photograph
-it.** UefiAccess never reads, shows or keeps it.
+C:. Never read the recovery password aloud, type it anywhere but this screen, copy it or photograph
+it. UefiAccess never reads, shows or keeps it.
 
 ## Part B: Windows does not start, or the wrong entry starts
 
@@ -68,18 +68,18 @@ do Part A first.)
 Once Windows is running, read the current state before changing anything: `uefiaccess boot` shows its
 BootOrder and BootNext lines. Then take the first case that fits:
 
-1. **BootOrder already starts with Windows Boot Manager and BootNext is not set.** Nothing to undo.
-2. **BootNext is still set** (a one-time boot the firmware did not use). Remove it: in the application,
+1. BootOrder already starts with Windows Boot Manager and BootNext is not set. Nothing to undo.
+2. BootNext is still set (a one-time boot the firmware did not use). Remove it: in the application,
    the BootNext row, `Alt+M` (Clear one-time boot), then `Alt+F` (Confirm change); or on the command
    line, `uefiaccess write bootnext --clear` as a dry run, then the same line with `--confirm`.
-3. **A UefiAccess reorder put the wrong entry first.** Put the order back from the snapshot of that
+3. A UefiAccess reorder put the wrong entry first. Put the order back from the snapshot of that
    change: the snapshot folder whose name ends in `-reorder` (never a `-restore` or `-bootnext` one).
    Each change names its snapshot when it is made (a folder named with the change's date and time,
    ending `-reorder`).
    On the command line, first the dry run
    `uefiaccess write restore <that folder> --bitlocker suspend`, then the same line with `--confirm`
    (use `--bitlocker continue` instead if the tool says the suspend is not offered). In the
-   application, Restore previous value (`Alt+P`) may be used instead **only** when the dialog's
+   application, Restore previous value (`Alt+P`) may be used instead only when the dialog's
    `What will change` names that same folder and its After box lists Windows Boot Manager first, because
    `Alt+P` always takes the newest snapshot; otherwise press Cancel (`Escape`). Then restart once and
    check that Windows starts normally.
@@ -115,28 +115,28 @@ light.
 Use this only when the machine does not POST. What it does:
 
 - It resets every BIOS setting to Dell's defaults and clears the BIOS passwords.
-- It does **not** repair a failed BIOS update, and this tool never updates the BIOS. **Never flash the
-  BIOS as a repair**: on this model a failed update cannot be repaired with the jumper.
+- It does not repair a failed BIOS update, and this tool never updates the BIOS. Never flash the
+  BIOS as a repair: on this model a failed update cannot be repaired with the jumper.
 - Whether it also clears the start entries (the boot list) is not known.
-- After it, BitLocker **will** ask for the recovery password (the defaults hide the TPM, so BitLocker
+- After it, BitLocker will ask for the recovery password (the defaults hide the TPM, so BitLocker
   cannot unlock drive C: by itself). Have the recovery password ready (Part A).
 
 With the machine off and unplugged, and after touching bare metal of the case: move the jumper cap from
-the PSWD pins to the RTCRST pins, plug the power cable in (do **not** press the power button), wait 10
+the PSWD pins to the RTCRST pins, plug the power cable in (do not press the power button), wait 10
 seconds, unplug again, move the cap back to the PSWD pins, close the cover, plug in and start. The
-owner's manual and Dell KB 000124377 show where the PSWD and RTCRST jumpers are. **Never start the
-machine with the cap off the PSWD pins except during this reset** (that clears the BIOS passwords).
+owner's manual and Dell KB 000124377 show where the PSWD and RTCRST jumpers are. Never start the
+machine with the cap off the PSWD pins except during this reset (that clears the BIOS passwords).
 
 ### C3. Put back the five settings in F2 Setup
 
 The reset restored Dell's defaults. Set these five again, and nothing else (Apply after each):
 
-1. General, Boot Sequence: Boot List Option = **UEFI**.
-2. General, Advanced Boot Options: untick **Enable Legacy Option ROMs**.
-3. Secure Boot, Secure Boot Enable = **Enabled**.
-4. Security: tick TPM Security (on), Apply, then TPM Activation = **Activate** (never "Clear"; if
+1. General, Boot Sequence: Boot List Option = UEFI.
+2. General, Advanced Boot Options: untick Enable Legacy Option ROMs.
+3. Secure Boot, Secure Boot Enable = Enabled.
+4. Security: tick TPM Security (on), Apply, then TPM Activation = Activate (never "Clear"; if
    Activate cannot be chosen yet, Apply, Exit, press F2 again at the next logo and set it then).
-5. System Configuration, SATA Operation = **AHCI**.
+5. System Configuration, SATA Operation = AHCI.
 
 Then check that "Windows Boot Manager" is in General, Boot Sequence. If the list is empty, add it with
 "Add Boot Option" (name Windows Boot Manager, file `\EFI\Microsoft\Boot\bootmgfw.efi` on the first

@@ -13,22 +13,36 @@ plus a small UI Automation recorder used for accessibility diagnostics.
 
 ## Supported hardware, and a safety warning
 
-**UefiAccess is validated and supported only on the 2014 Dell OptiPlex 7020 with BIOS A18.** Reading
+UefiAccess is validated and supported only on the 2014 Dell OptiPlex 7020 with BIOS A18. Reading
 UEFI variables works on any UEFI Windows 11 machine, and the offline baseline view works on any
 Windows PC, but everything else (the Dell BIOS settings view, checked against BIOS A18 only, and all
 firmware writes) is verified on that one model and BIOS version only.
 
-**Writing firmware variables can affect whether the machine starts.** This tool changes the boot
+Writing firmware variables can affect whether the machine starts. This tool changes the boot
 order and the one-time boot; a bad change, or firmware that behaves differently from the reference
 unit, can leave a machine that starts the wrong entry or does not start Windows. Writes are restricted
 by design to a configured "enabled unit" (see "Write guarantee"); on any other machine the write is
-refused at the confirmation step. **Using this tool to change firmware on any machine other than the
-validated one is unsupported and at your own risk.** If a machine does not start normally after a
+refused at the confirmation step. Using this tool to change firmware on any machine other than the
+validated one is unsupported and at your own risk. If a machine does not start normally after a
 change, see [docs/Recovery.md](docs/Recovery.md).
 
 The build is unsigned; there is no installer, no JAWS support and no localization.
 
-## Build and run
+## Download
+
+Prebuilt releases are on the [Releases page](https://github.com/KarlBelanger/UEFI-Access/releases/latest).
+Each release includes a self-contained Windows x64 build with the .NET 8 runtime bundled, so nothing
+else needs to be installed:
+
+- `UefiAccess.App.exe`, the accessible application.
+- `uefiaccess.exe`, the command-line tool.
+
+Unzip it anywhere and run. The application requests administrator rights itself; the command-line tool
+needs an elevated prompt. Reading UEFI variables works on any UEFI Windows 11 machine, but firmware
+writes are refused on every machine except the supported unit (see the safety warning above and the
+write guarantee below).
+
+## Build from source
 
 You need the .NET 8 SDK (x64) to build and test, and the machine-wide .NET 8 Desktop Runtime (x64) to
 run. From the repository root:
@@ -77,8 +91,8 @@ code holds a one-way hash of that installation's Windows machine ID and compares
 it runs on; neither the ID nor the hash is printed, logged or recorded. On every other machine the dry
 run, the Change controls and the `Confirm change` dialog work, and the confirmation is refused before
 anything is snapshotted, suspended or written (the check `expectedModel` for another model or BIOS
-version, `expectedUnit` for another unit). **The check recognizes the Windows installation, not the
-hardware:** a disk clone, a moved drive, a restored system image or a shared deployment image can carry
+version, `expectedUnit` for another unit). The check recognizes the Windows installation, not the
+hardware: a disk clone, a moved drive, a restored system image or a shared deployment image can carry
 the same machine ID onto another machine, which would then be taken for the unit. Before deploying the
 tool for anyone else, tie the check to the hardware (see
 [docs/Developer-Guide.md](docs/Developer-Guide.md), section 5.2). A reinstall of Windows on the enabled
@@ -110,7 +124,7 @@ and the compiled assemblies, and print `file:line` for each hit. A guard is chan
 of its own, reviewed line by line. The guards are the floor; review of the three write-path files is
 the real control.
 
-- **`NoWriteGuardTests`** scans every line of `src/**/*.cs`, `src/**/*.xaml`, `tools/**/*.ps1` and
+- `NoWriteGuardTests` scans every line of `src/**/*.cs`, `src/**/*.xaml`, `tools/**/*.ps1` and
   `tools/**/*.psm1` (not `bin/` or `obj/`), comments and string literals included, and fails on any
   line that: names a firmware, Secure Boot, BitLocker, TPM, registry or boot-configuration write API
   (for example `SetFirmwareEnvironmentVariable`, `NtSetSystemEnvironmentValue`, the registry writers,
@@ -120,7 +134,7 @@ the real control.
   (`Invoke-Expression`, `-EncodedCommand`, and the like); or passes `cctk` any option other than
   exactly `--version` or `--secureboot`. The test also pins by reflection the constants the scan
   trusts and checks the source of the three process launches.
-- The **Dell settings reader** (`src/UefiAccess.Core/Settings/Dell/CctkReader.cs`) runs cctk to read
+- The Dell settings reader (`src/UefiAccess.Core/Settings/Dell/CctkReader.cs`) runs cctk to read
   nine settings, one option name per run and never a value: `--secureboot`, `--embsataraid`, `--tpm`,
   `--tpmactivation`, `--virtualization`, `--vtfordirectio`, `--embnic1`, `--wakeonlan` and
   `--numlock`. These nine are pinned by reflection in `CctkReader.cs`, its single `RunCctk` call
@@ -132,26 +146,26 @@ the real control.
   `SetFirmwareEnvironmentVariable` may stand in `Kernel32.cs` and `FirmwareVariableWriter.cs`, and
   `DisableKeyProtectors` in `BitLockerSuspender.cs`, each on an exact number of lines. Every other
   forbidden name stays forbidden in those files too.
-- **`CompiledStringGuardTests`** applies the same checks to every string compiled into the Core, CLI
+- `CompiledStringGuardTests` applies the same checks to every string compiled into the Core, CLI
   and Presentation assemblies, so a name split in the source (`"Suspend-Bit" + "Locker"`) is caught.
-- **`WriteCallSiteGuardTests`** and **`WhitelistGuardTests`** pin the write path itself: the import is
+- `WriteCallSiteGuardTests` and `WhitelistGuardTests` pin the write path itself: the import is
   declared once and called once from the writer, `CommitOnce` has exactly one caller, there is no loop
   around the call, `WritePlan` has no public constructor, the test project never constructs the real
   writer or suspender, and the whitelist holds exactly BootOrder and BootNext with attributes `0x7`
   and no request type that carries bytes.
-- **`ProcessLaunchGuardTests`**: only `src/UefiAccess.Core/Platform/ProcessRunner.cs` may create a
+- `ProcessLaunchGuardTests`: only `src/UefiAccess.Core/Platform/ProcessRunner.cs` may create a
   process, and only `DellInterfaceProbe.cs`, `SecureBootPolicyInspector.cs` and
   `Settings/Dell/CctkReader.cs` may call it.
-- **`DellSettingsGuardTests`**: the settings folder names no Dell service or string class and no WMI
+- `DellSettingsGuardTests`: the settings folder names no Dell service or string class and no WMI
   method call, uses no `System.Management` type directly (WMI only through `WmiHelper`), and runs only
   its pinned queries; nothing under `src/` or `tools/` controls a service or installs software; no
   public settings member begins with `Set`, `Write`, `Apply`, `Change`, `Enable`, `Disable`, `Reset`
   or `Save`; and no test on Windows runs the real Dell reader, so the suite is safe to run on the
   target machine itself.
-- **`NativeLocationGuardTests`**: native declarations live only in `src/UefiAccess.Core/Native` and
+- `NativeLocationGuardTests`: native declarations live only in `src/UefiAccess.Core/Native` and
   are reached through interfaces; no file binds native code at run time; exactly one forbidden-named
   import exists, `SetFirmwareEnvironmentVariableExW` from kernel32.
-- **`WmiCallsAreBoundedTests`**: every WMI round trip under `src/` is bounded.
+- `WmiCallsAreBoundedTests`: every WMI round trip under `src/` is bounded.
 
 What these scans cannot see (a name assembled at run time, reflection, `dynamic`, a PowerShell
 command held in a variable, or a registry path set on another line) is why review of every change to
@@ -165,7 +179,8 @@ Copyright © 2026 Roger Belanger and Karl Belanger.
 
 ## Contributing
 
-Contributions are welcome. By contributing you certify the Developer Certificate of Origin (see
-[DCO.txt](DCO.txt)) by signing off your commits with `git commit -s`. Please read
-[CONTRIBUTING.md](CONTRIBUTING.md) first, in particular the safety discipline around the write path
-and the guard tests described above.
+Contributions are welcome, and so are bug reports, accessibility feedback, and testing on the
+supported hardware, through the project's GitHub issues. By contributing code you certify the
+Developer Certificate of Origin (see [DCO.txt](DCO.txt)) by signing off your commits with
+`git commit -s`. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first, in particular the safety
+discipline around the write path and the guard tests described above.

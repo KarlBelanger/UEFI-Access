@@ -10,7 +10,7 @@ Contributions are accepted under the Developer Certificate of Origin (DCO). The 
 statement that you wrote the contribution, or otherwise have the right to submit it under the
 project's license. The full text is in [DCO.txt](DCO.txt).
 
-You certify the DCO by **signing off** each commit:
+You certify the DCO by signing off each commit:
 
 ```
 git commit -s -m "Your commit message"
@@ -27,18 +27,18 @@ version 2.0, the same license as the project (see [LICENSE](LICENSE)).
 
 ## Development
 
-- **Build and test** from the repository root with the .NET 8 SDK (x64):
+- Build and test from the repository root with the .NET 8 SDK (x64):
 
   ```
   dotnet build UefiAccess.sln -c Release
   dotnet test UefiAccess.sln -c Release
   ```
 
-  The build must end with **0 warnings and 0 errors** (`TreatWarningsAsErrors` is on), and every test
+  The build must end with 0 warnings and 0 errors (`TreatWarningsAsErrors` is on), and every test
   must pass. Projects under `src/` generate XML documentation, so every public member needs a `///`
   doc comment. [docs/BUILD.md](docs/BUILD.md) has the prerequisites, the reasons and a troubleshooting
   table.
-- **Architecture and how to extend the tool** are in [docs/Developer-Guide.md](docs/Developer-Guide.md),
+- Architecture and how to extend the tool are in [docs/Developer-Guide.md](docs/Developer-Guide.md),
   section 8 (adding a decoder, a Dell field, a command or a window region, supporting another firmware
   vendor, and adding a new changeable setting). Accessibility behavior and the keyboard contract are
   in [docs/Keyboard-Map.md](docs/Keyboard-Map.md).
@@ -51,8 +51,8 @@ path lives in three files: `Native/Kernel32.cs`, `Safety/FirmwareVariableWriter.
 and [docs/Developer-Guide.md](docs/Developer-Guide.md), section 5).
 
 - A change to the write pipeline, the whitelist, the guard tests, or the `cctk` allow-list goes in a
-  **commit of its own, reviewed line by line**, separate from the rest of a change.
-- **Never widen** the whitelist, the write path, the WMI method allow-list or the `cctk` option
+  commit of its own, reviewed line by line, separate from the rest of a change.
+- Never widen the whitelist, the write path, the WMI method allow-list or the `cctk` option
   allow-list without that review. A change that adds a writable setting is the most sensitive change
   in the project; follow [docs/Developer-Guide.md](docs/Developer-Guide.md), section 8.5.
 - Keep every reading path read-only: WMI only through `WmiHelper`, processes only through
