@@ -113,6 +113,30 @@ public sealed class PlatformLogicTests
     }
 
     [Theory]
+    [InlineData("ASUS TUF Gaming F16 FX608JPR_FX608JPR", "FX608JPR.312", "Intel(R) Core(TM) i7-14650HX")]
+    [InlineData("Latitude 5440", "1.12.0", "13th Gen Intel(R) Core(TM) i5-1345U")]
+    public void ExpectedModel_OtherModelWithNewCpuOrXyzBios_DoesNotClaimRelaunch(string model, string bios, string cpu)
+    {
+        ExpectedModelEvaluation evaluation = MachineIdentity.EvaluateExpectedModel(model, bios, cpu);
+
+        Assert.False(evaluation.Confirmed);
+        Assert.False(evaluation.ModelMatched);
+        Assert.False(evaluation.LooksLikeRelaunch);
+        Assert.Contains("Expected model not confirmed: model did not match", evaluation.Notes, StringComparison.Ordinal);
+        Assert.DoesNotContain("2024 relaunch", evaluation.Notes, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ExpectedModel_UnknownModelWithRelaunchSignals_StillWarns()
+    {
+        ExpectedModelEvaluation evaluation = MachineIdentity.EvaluateExpectedModel(null, "1.5.0", "13th Gen Intel(R) Core(TM) i5-13500");
+
+        Assert.False(evaluation.Confirmed);
+        Assert.True(evaluation.LooksLikeRelaunch);
+        Assert.Contains("2024 relaunch", evaluation.Notes, StringComparison.Ordinal);
+    }
+
+    [Theory]
     [InlineData(null, null, null)]
     [InlineData("", "", "")]
     [InlineData("   ", "\t", " ")]

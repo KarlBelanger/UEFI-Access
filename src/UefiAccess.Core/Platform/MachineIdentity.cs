@@ -199,8 +199,9 @@ public sealed class MachineIdentity : IPlatformInspector<MachineIdentityResult>
     /// Checks identity strings against the planned 2014 Dell OptiPlex 7020: the model contains
     /// "7020" (case-insensitive), the BIOS version matches ^A\d\d$ (for example A18), and the CPU
     /// is a 4th-generation part (i3/i5/i7-4xxx, or Pentium/Celeron G18xx, G32xx-G34xx). When the
-    /// BIOS version uses the x.y.z scheme or the CPU is 12th generation or newer, the notes warn
-    /// that the unit looks like the 2024 relaunch, not the planned unit.
+    /// BIOS version uses the x.y.z scheme or the CPU is 12th generation or newer, and the model is a
+    /// 7020 or is not available, the notes warn that the unit looks like the 2024 relaunch, not the
+    /// planned unit. Any other model gets no relaunch warning.
     /// </summary>
     /// <param name="model">Win32_ComputerSystem.Model.</param>
     /// <param name="biosVersion">Win32_BIOS.SMBIOSBIOSVersion.</param>
@@ -215,8 +216,11 @@ public sealed class MachineIdentity : IPlatformInspector<MachineIdentityResult>
         bool modelMatch = modelText is not null && modelText.Contains("7020", StringComparison.OrdinalIgnoreCase);
         bool biosMatch = biosText is not null && ASeriesBiosPattern.IsMatch(biosText);
         bool cpuMatch = cpuText is not null && (HaswellCorePattern.IsMatch(cpuText) || HaswellPentiumCeleronPattern.IsMatch(cpuText));
-        bool relaunchBios = biosText is not null && RelaunchBiosPattern.IsMatch(biosText);
-        bool relaunchCpu = IsTwelfthGenOrNewer(cpuText);
+        // The relaunch is itself an OptiPlex 7020, so its signals only point at it when the model
+        // is a 7020 or could not be read; any other model is simply not the planned unit.
+        bool couldBeRelaunch = modelMatch || modelText is null;
+        bool relaunchBios = couldBeRelaunch && biosText is not null && RelaunchBiosPattern.IsMatch(biosText);
+        bool relaunchCpu = couldBeRelaunch && IsTwelfthGenOrNewer(cpuText);
         int? generation = TryGetIntelCoreGeneration(cpuText);
         bool confirmed = modelMatch && biosMatch && cpuMatch;
 
